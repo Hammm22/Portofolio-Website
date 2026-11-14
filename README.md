@@ -9,11 +9,6 @@ Situs web portofolio interaktif milik **Ilham Dwi Arsandy (`Hammm22`)**, siswa S
 - **Ikonografi:** Phosphor Icons (`@phosphor-icons/react`)
 - **Tipografi:** `Syne` (Display), `Plus Jakarta Sans` (Body), `JetBrains Mono` (Metadata Teknis)
 
-## Dokumentasi Proyek
-- **[DESIGN.md](./DESIGN.md):** Spesifikasi sistem desain, palet warna Deep Midnight & Electric Cobalt (terverifikasi WCAG AA), dan arsitektur tata letak.
-- **[AGENTS.md](./AGENTS.md):** Panduan standar kode, aturan konten bebas *AI-slop*, dan aksesibilitas untuk AI Coding Agents.
-- **[GEMINI.md](./GEMINI.md):** Konteks ringkas ruang kerja untuk Gemini / Antigravity.
-
 ## Menjalankan Proyek Secara Lokal
 
 ```bash
