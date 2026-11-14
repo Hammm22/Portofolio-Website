@@ -1,0 +1,32 @@
+# Ilham Dwi Arsandy (Hammm22)
+
+> Siswa SMK jurusan PPLG (Pengembangan Perangkat Lunak dan Gim) dan Creative Frontend & Web Developer di Indonesia yang membangun aplikasi web interaktif serta aplikasi mobile lintas platform menggunakan React, Next.js, Laravel, dan Flutter.
+
+- Website: https://hamm22projects.dev
+- GitHub: https://github.com/Hammm22
+- Email: ilhamdwiarsandy61@gmail.com
+- CV: https://hamm22projects.dev/cv-ilham-dwi-arsandy.pdf
+
+## Keahlian Utama
+- **Frontend & Antarmuka:** JavaScript (ES6+), React.js, Next.js, Vue.js, Tailwind CSS, GSAP & ScrollTrigger
+- **Backend & Mobile:** PHP, Laravel (Blade), Node.js, Dart & Flutter, Java (Android), C++ & Lua
+- **Alur Kerja & Perkakas:** Git, GitHub, VS Code, Figma, Postman, Vercel Deployment
+
+## Karya Unggulan (Featured Projects)
+1. **Jejak Sehat (2026)** - Catatan Perjalanan & Pemantauan Suhu Tubuh (Web Next.js + Prisma & Mobile Flutter/Dart).
+   - Live: https://jejak-sehat.vercel.app
+   - Repo Web: https://github.com/Hammm22/Jejak-Sehat
+   - Repo Mobile: https://github.com/Hammm22/JejakSehat_Mobile
+2. **Ketemuin.com (2026)** - Platform Pelaporan & Klaim Barang Hilang berbasis Laravel MVC, Blade, dan MySQL.
+   - Repo: https://github.com/Hammm22/Ketemuin.com
+3. **MovieList (2026)** - Katalog Eksplorasi Film & Pencarian Cepat berbasis React (Vite), Tailwind CSS, Framer Motion, dan TMDB API.
+   - Live: https://movie-list-gilt.vercel.app
+   - Repo: https://github.com/Hammm22/MovieList
+4. **GameJar (2026)** - Aplikasi Android Native (Java OOP) Pemantau Harga Game & Tabungan Target (kolaborasi tim).
+   - Repo: https://github.com/Hammm22/GameJar
+
+## Arsip Repositori Tambahan
+- **concert-app (2026):** Aplikasi web jadwal konser berbasis Vue.js (https://github.com/Hammm22/concert-app)
+- **inventory-app (2026):** Sistem manajemen inventaris barang CRUD (https://github.com/Hammm22/inventory-app)
+- **Perpus-Digital (2025):** Aplikasi perpustakaan digital sekolah berbasis PHP & MySQL (https://github.com/Hammm22/Perpus-Digital)
+- **Portfolio-Website v1 (2025):** Iterasi awal portofolio statis (https://github.com/Hammm22/Portfolio-Website)
