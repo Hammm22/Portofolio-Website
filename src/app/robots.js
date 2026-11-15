@@ -1,4 +1,4 @@
-import { PROFILE_DATA } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
 
 export default function robots() {
   return {

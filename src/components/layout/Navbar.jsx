@@ -10,13 +10,11 @@ import {
   GithubLogo,
   EnvelopeSimple
 } from "@phosphor-icons/react";
-import { PROFILE_DATA } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
 
 const DESKTOP_NAV_ITEMS = [
   { id: "about", label: "Tentang", href: "#about" },
-  { id: "services", label: "Layanan", href: "#services" },
   { id: "projects", label: "Karya", href: "#projects" },
-  { id: "workflow", label: "Alur", href: "#workflow" },
   { id: "archive", label: "Arsip", href: "#archive" },
   { id: "certificates", label: "Sertifikat", href: "#certificates" },
   { id: "journey", label: "Perjalanan", href: "#journey" }

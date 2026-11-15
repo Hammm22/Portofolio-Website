@@ -20,6 +20,21 @@ const nextConfig = {
       }
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "portfolio-website-three-roan-77.vercel.app"
+          }
+        ],
+        destination: "https://hamm22projects.dev/:path*",
+        permanent: true
+      }
+    ];
+  },
   async headers() {
     return [
       {

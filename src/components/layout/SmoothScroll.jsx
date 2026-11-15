@@ -11,6 +11,8 @@ export default function SmoothScroll({ children }) {
   const progressBarRef = useRef(null);
 
   useEffect(() => {
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;

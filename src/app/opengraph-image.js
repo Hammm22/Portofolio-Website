@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { PROFILE_DATA } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
 
 export const alt =
   "Ilham Dwi Arsandy (Hammm22) | Creative Frontend & Web Developer PPLG";

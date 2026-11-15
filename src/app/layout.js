@@ -1,9 +1,7 @@
 import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
-import {
-  PROFILE_DATA,
-  SKILL_GROUPS,
-  FEATURED_PROJECTS
-} from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
+import { SKILL_GROUPS } from "@/data/techData";
+import { FEATURED_PROJECTS } from "@/data/projectsData";
 import "./globals.css";
 
 const syne = Syne({
@@ -92,7 +90,11 @@ const jsonLd = {
       image: PROFILE_DATA.avatarUrl,
       email: `mailto:${PROFILE_DATA.email}`,
       sameAs: [PROFILE_DATA.githubUrl],
-      knowsAbout: SKILL_GROUPS.flatMap((group) => group.items)
+      knowsAbout: SKILL_GROUPS.flatMap((group) =>
+        group.items.map((item) =>
+          typeof item === "string" ? item : item.fullLabel || item.label
+        )
+      )
     },
     {
       "@type": "ProfilePage",

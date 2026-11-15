@@ -27,7 +27,7 @@ Portofolio siswa SMK PPLG yang menggabungkan dokumentasi rekayasa lintas platfor
 
 ## Capabilities and Constraints
 
-- **Stack Teknis Terkunci:** Next.js (App Router) dengan JavaScript murni (`.js` / `.jsx`, tanpa TypeScript), Tailwind CSS, GSAP (`@gsap/react` + `ScrollTrigger`), Lenis Smooth Scroll, dan `@phosphor-icons/react`.
+- **Stack Teknis Terkunci:** Next.js (App Router) dengan JavaScript murni (`.js` / `.jsx`, tanpa TypeScript), Tailwind CSS, GSAP (`@gsap/react`, `ScrollTrigger`, `Flip`), Three.js (`three`, lazy-load khusus Hero desktop `>= 1024px`), Lenis Smooth Scroll, dan `@phosphor-icons/react`.
 - **Integrasi Data Nyata:** Mengambil statistik profil publik secara langsung dari `https://api.github.com/users/Hammm22` disertai fallback data terverifikasi saat API mengalami batas pemanggilan (*rate limit*) atau kendala jaringan.
 - **Kejujuran Bukti:** Hanya menampilkan proyek yang benar-benar ada di akun GitHub `Hammm22`. Dilarang menambahkan testimoni fiktif, metrik perusahaan karangan, atau tautan kosong.
 - **Fakta Terbuka (Menunggu Input Pengguna):** Nama spesifik sekolah SMK dan alamat email resmi (saat ini masih menggunakan label umum `Siswa SMK Jurusan PPLG` dan placeholder `ilhamdwiarsandy@gmail.com` hingga pengguna mengirimkan detail resminya).
@@ -42,7 +42,7 @@ Portofolio siswa SMK PPLG yang menggabungkan dokumentasi rekayasa lintas platfor
 
 ## Evidence on Hand
 
-- **Data Terpusat:** `src/data/portfolioData.js`
+- **Data Terpusat (Modular):** `src/data/` (`profileData.js`, `techData.js`, `projectsData.js`, `certificatesData.js`, `journeyData.js`, + barrel `portfolioData.js`)
 - **4 Karya Pilihan Utama:**
   1. `Jejak Sehat` (Web JavaScript & Mobile Flutter/Dart) — Live: `https://jejak-sehat.vercel.app` | Repo Web: `https://github.com/Hammm22/Jejak-Sehat` | Repo Mobile: `https://github.com/Hammm22/JejakSehat_Mobile`
   2. `Ketemuin.com` (Fullstack Laravel & Blade Lost and Found) — Repo: `https://github.com/Hammm22/Ketemuin.com`

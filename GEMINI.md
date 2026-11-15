@@ -8,11 +8,13 @@ File ini menyediakan konteks cepat untuk Gemini / Antigravity saat bekerja di da
 
 ## Ringkasan Struktur Folder
 - `src/app/layout.js` : Root Server Component (memuat font `Syne`, `Plus Jakarta Sans`, `JetBrains Mono` dan *Skip-to-Content* link).
-- `src/app/page.js` : Halaman utama (Server Component) yang menyusun 9 section portofolio (`Hero`, `KineticMarquee`, `AboutSection`, `ServicesSection`, `FeaturedProjects`, `WorkflowSection`, `ProjectArchive`, `CertificateSection`, `JourneyTimeline`) dengan latar kanvas bintang astronomi.
+- `src/app/page.js` : Halaman utama (Server Component) yang menyusun 6 section utama portofolio (`Hero`, `AboutSection`, `FeaturedProjects`, `ProjectArchive`, `CertificateSection`, `JourneyTimeline`) dengan latar kanvas bintang astronomi.
+- `src/app/not-found.js` : Halaman 404 kustom observatorium dengan tautan kembali ke beranda dan daftar karya.
 - `src/app/globals.css` : Variabel CSS, aturan tipografi fluid, `:focus-visible`, dan `prefers-reduced-motion`.
-- `src/data/portfolioData.js` : Sumber data terpusat berisi profil Ilham Dwi Arsandy (`Hammm22`), foto potret observatorium (`photoUrl`), CV (`cvUrl`), 4 proyek unggulan, 9 arsip repositori PPLG, 6 sertifikat kompetensi (`CERTIFICATES`), matriks keahlian, dan perjalanan belajar Kelas X-XII.
-- `src/components/layout/` : `SmoothScroll.jsx` (Lenis + GSAP ticker + progress bar), `StarfieldCanvas.jsx` (HTML5 Canvas 3-layer parallax starfield + nebula + constellation cursor + shooting star), `CustomCursor.jsx` (cincin kursor interaktif), `Navbar.jsx`, dan `Footer.jsx`.
-- `src/components/sections/` : `Hero.jsx`, `KineticMarquee.jsx`, `AboutSection.jsx`, `ServicesSection.jsx`, `FeaturedProjects.jsx`, `WorkflowSection.jsx`, `ProjectVisualStage.jsx`, `ProjectArchive.jsx`, `CertificateSection.jsx`, dan `JourneyTimeline.jsx`.
+- `src/data/` : Data modular terpisah per domain: `profileData.js` (profil Ilham Dwi Arsandy `Hammm22`, foto, CV), `techData.js` (`SKILL_GROUPS`), `projectsData.js` (4 proyek unggulan & 9 arsip repositori PPLG), `certificatesData.js` (`CERTIFICATES` & kategori), `journeyData.js` (perjalanan Kelas X-XII), serta `portfolioData.js` (barrel re-export kompatibilitas).
+- `src/hooks/` : `useGithubProfile.js` (pengambilan statistik profil GitHub + cache lokal 30 menit + fallback data).
+- `src/components/layout/` : `SmoothScroll.jsx` (Lenis + GSAP ticker + progress bar), `StarfieldCanvas.jsx` (HTML5 Canvas 3-layer parallax starfield + nebula + constellation cursor + shooting star), `ScrollRocket.jsx` (GSAP MotionPath scroll shuttle), `Navbar.jsx`, dan `Footer.jsx`.
+- `src/components/sections/` : `Hero.jsx`, `HeroObservatory3D.jsx` (Three.js desktop lazy 3D gyroscope), `AboutSection.jsx`, `FeaturedProjects.jsx`, `ProjectVisualStage.jsx`, `ProjectArchive.jsx`, `CertificateSection.jsx`, dan `JourneyTimeline.jsx`.
 - `public/` : `images/profile-placeholder.svg` (bingkai potret 4:5), `images/certificates/*.svg` (6 placeholder foto sertifikat 16:11), dan `cv-ilham-dwi-arsandy.pdf`.
 
 ## Prinsip Utama Saat Mengedit

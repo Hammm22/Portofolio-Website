@@ -4,18 +4,19 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
 import { ArrowsOutSimple, X } from "@phosphor-icons/react";
-import { CERTIFICATES, CERTIFICATE_CATEGORIES } from "@/data/portfolioData";
+import { CERTIFICATES, CERTIFICATE_CATEGORIES } from "@/data/certificatesData";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip);
 
 export default function CertificateSection() {
   const sectionRef = useRef(null);
   const modalDialogRef = useRef(null);
   const closeBtnRef = useRef(null);
   const lastTriggerRef = useRef(null);
-  const hasInteractedFilterRef = useRef(false);
+  const flipStateRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState("Semua");
   const [selectedCert, setSelectedCert] = useState(null);
 
@@ -41,38 +42,90 @@ export default function CertificateSection() {
             once: true
           }
         });
+      });
 
-        gsap.from(".cert-card-item", {
-          y: 34,
-          opacity: 0,
-          duration: 0.68,
-          stagger: 0.09,
-          ease: "power3.out",
-          clearProps: "transform,opacity",
-          scrollTrigger: {
-            trigger: ".cert-cards-grid",
-            start: "top 84%",
-            once: true
-          }
-        });
-
-        gsap.fromTo(
-          ".cert-thumb-mask",
-          { clipPath: "inset(12% 0% 0% 0% round 6px)" },
-          {
-            clipPath: "inset(0% 0% 0% 0% round 6px)",
-            duration: 0.85,
+      mm.add(
+        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          gsap.from(".cert-card-item", {
+            y: 34,
+            opacity: 0,
+            duration: 0.68,
             stagger: 0.09,
-            ease: "expo.out",
-            clearProps: "clipPath",
+            ease: "power3.out",
+            clearProps: "transform,opacity",
             scrollTrigger: {
               trigger: ".cert-cards-grid",
               start: "top 84%",
               once: true
             }
-          }
-        );
-      });
+          });
+
+          gsap.fromTo(
+            ".cert-thumb-mask",
+            { clipPath: "inset(12% 0% 0% 0% round 6px)" },
+            {
+              clipPath: "inset(0% 0% 0% 0% round 6px)",
+              duration: 0.85,
+              stagger: 0.09,
+              ease: "expo.out",
+              clearProps: "clipPath",
+              scrollTrigger: {
+                trigger: ".cert-cards-grid",
+                start: "top 84%",
+                once: true
+              }
+            }
+          );
+        }
+      );
+
+      mm.add(
+        "(max-width: 1023px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const cards = gsap.utils.toArray(".cert-card-item");
+          cards.forEach((card) => {
+            gsap.set(card, { transformPerspective: 1050 });
+            gsap.fromTo(
+              card,
+              { rotationX: 9, y: 28, scale: 0.95, opacity: 0.4 },
+              {
+                rotationX: 0,
+                y: 0,
+                scale: 1,
+                opacity: 1,
+                ease: "none",
+                clearProps: "transform,opacity",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 93%",
+                  end: "center 68%",
+                  scrub: 0.45
+                }
+              }
+            );
+
+            const thumbMask = card.querySelector(".cert-thumb-mask");
+            if (thumbMask) {
+              gsap.fromTo(
+                thumbMask,
+                { clipPath: "inset(10% 0% 0% 0% round 6px)" },
+                {
+                  clipPath: "inset(0% 0% 0% 0% round 6px)",
+                  duration: 0.7,
+                  ease: "expo.out",
+                  clearProps: "clipPath",
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                    once: true
+                  }
+                }
+              );
+            }
+          });
+        }
+      );
     },
     { scope: sectionRef }
   );
@@ -81,22 +134,41 @@ export default function CertificateSection() {
     () => {
       const mm = gsap.matchMedia();
 
-      if (hasInteractedFilterRef.current) {
-        mm.add("(prefers-reduced-motion: no-preference)", () => {
-          gsap.fromTo(
-            ".cert-card-item",
-            { y: 36, scale: 0.94, opacity: 0.3 },
-            {
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              duration: 0.55,
-              stagger: 0.07,
-              ease: "power3.out",
-              clearProps: "transform,opacity"
+      const state = flipStateRef.current;
+      flipStateRef.current = null;
+      if (state) {
+        if (
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+          !sectionRef.current?.querySelector(".cert-card-item")
+        ) {
+          ScrollTrigger.refresh();
+        } else {
+          Flip.from(state, {
+            targets: ".cert-card-item",
+            duration: 0.52,
+            stagger: 0.045,
+            ease: "power3.inOut",
+            scale: true,
+            simple: true,
+            onEnter: (elements) =>
+              gsap.fromTo(
+                elements,
+                { opacity: 0, y: 24, scale: 0.92 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  duration: 0.45,
+                  stagger: 0.05,
+                  ease: "power3.out",
+                  clearProps: "transform,opacity"
+                }
+              ),
+            onComplete: () => {
+              ScrollTrigger.refresh();
             }
-          );
-        });
+          });
+        }
       }
 
       mm.add(
@@ -225,7 +297,13 @@ export default function CertificateSection() {
   }, [selectedCert]);
 
   const handleCategoryChange = (category) => {
-    hasInteractedFilterRef.current = true;
+    if (
+      typeof window !== "undefined" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      sectionRef.current?.querySelector(".cert-card-item")
+    ) {
+      flipStateRef.current = Flip.getState(".cert-card-item");
+    }
     setActiveCategory(category);
   };
 
@@ -292,7 +370,7 @@ export default function CertificateSection() {
             {filteredCertificates.map((cert) => (
               <article
                 key={cert.id}
-                data-cursor-hover
+                data-flip-id={cert.id}
                 className="cert-card-item group relative flex flex-col justify-between overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-5 transition-[border-color,box-shadow] duration-200 hover:border-[#38BDF8] hover:shadow-[0_18px_45px_rgba(37,99,235,0.22)]"
               >
                 <div

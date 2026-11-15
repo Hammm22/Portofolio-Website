@@ -1,13 +1,35 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ArrowDownRight, FilePdf, ArrowDown } from "@phosphor-icons/react";
-import { PROFILE_DATA } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const HeroObservatory3D = dynamic(() => import("./HeroObservatory3D"), {
+  ssr: false
+});
+
+const DESKTOP_3D_QUERY =
+  "(min-width: 1024px) and (prefers-reduced-motion: no-preference)";
+
+function subscribeDesktop3D(callback) {
+  const mql = window.matchMedia(DESKTOP_3D_QUERY);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
+function getDesktop3DSnapshot() {
+  return window.matchMedia(DESKTOP_3D_QUERY).matches;
+}
+
+function getDesktop3DServerSnapshot() {
+  return false;
+}
 
 const HERO_WORDS = PROFILE_DATA.heroHeadline.split(" ");
 
@@ -20,6 +42,12 @@ export default function Hero() {
   const outerRingRef = useRef(null);
   const parallaxStageRef = useRef(null);
   const scrollCueRef = useRef(null);
+
+  const showDesktop3D = useSyncExternalStore(
+    subscribeDesktop3D,
+    getDesktop3DSnapshot,
+    getDesktop3DServerSnapshot
+  );
 
   useGSAP(
     () => {
@@ -99,8 +127,8 @@ export default function Hero() {
 
         if (contentWrapRef.current) {
           gsap.to(contentWrapRef.current, {
-            yPercent: -18,
-            scale: 0.94,
+            yPercent: -16,
+            scale: 0.95,
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -110,6 +138,61 @@ export default function Hero() {
             }
           });
         }
+      });
+
+      mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
+        const cleanups = [];
+
+        // Mobile Scroll-Scrubbed Orbital Depth Parallax
+        if (parallaxStageRef.current) {
+          gsap.to(parallaxStageRef.current, {
+            scale: 1.16,
+            rotation: 12,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.55
+            }
+          });
+        }
+
+        // Tactile Spring Tap Feedback on Mobile CTA Buttons
+        const mobileButtons = [primaryBtnRef.current, secondaryBtnRef.current].filter(
+          Boolean
+        );
+        mobileButtons.forEach((btn) => {
+          const onPressDown = () => {
+            gsap.to(btn, {
+              scale: 0.94,
+              duration: 0.12,
+              ease: "power2.out",
+              overwrite: "auto"
+            });
+          };
+          const onPressUp = () => {
+            gsap.to(btn, {
+              scale: 1,
+              duration: 0.45,
+              ease: "elastic.out(1.1, 0.5)",
+              overwrite: "auto"
+            });
+          };
+
+          btn.addEventListener("pointerdown", onPressDown);
+          btn.addEventListener("pointerup", onPressUp);
+          btn.addEventListener("pointercancel", onPressUp);
+          btn.addEventListener("pointerleave", onPressUp);
+          cleanups.push(() => {
+            btn.removeEventListener("pointerdown", onPressDown);
+            btn.removeEventListener("pointerup", onPressUp);
+            btn.removeEventListener("pointercancel", onPressUp);
+            btn.removeEventListener("pointerleave", onPressUp);
+          });
+        });
+
+        return () => cleanups.forEach((fn) => fn());
       });
 
       mm.add(
@@ -264,55 +347,82 @@ export default function Hero() {
         </svg>
       </div>
 
-      <div
-        ref={contentWrapRef}
-        className="relative z-10 mx-auto w-full max-w-4xl px-4 text-center will-change-transform sm:px-6 lg:px-8"
-      >
-        <h1>
-          <span className="hero-name-reveal block text-xs font-semibold tracking-wide text-[#38BDF8] sm:text-base">
-            {PROFILE_DATA.name} ({PROFILE_DATA.handle}) · Web &amp; Mobile Developer
-          </span>
-
-          {/* Split-Word Curtain Mask Headline */}
-          <span className="font-display-hero mt-3 flex flex-wrap justify-center gap-x-[0.26em] gap-y-1 font-extrabold text-[#F8FAFC] sm:mt-4">
-            {HERO_WORDS.map((word, idx) => (
-              <span key={idx} className="inline-block overflow-hidden pb-1.5 sm:pb-2">
-                <span className="hero-word-inner inline-block will-change-transform">
-                  {word}
-                </span>
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
+          <div
+            ref={contentWrapRef}
+            className="text-center will-change-transform lg:col-span-7 lg:text-left"
+          >
+            <h1>
+              <span className="hero-name-reveal block text-xs font-semibold tracking-wide text-[#38BDF8] sm:text-base">
+                {PROFILE_DATA.name} ({PROFILE_DATA.handle}) · Web &amp; Mobile Developer
               </span>
-            ))}
-          </span>
-        </h1>
 
-        <p className="hero-sub-reveal mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#CBD5E1] sm:mt-5 sm:text-lg">
-          {PROFILE_DATA.heroSummary}
-        </p>
+              {/* Split-Word Curtain Mask Headline */}
+              <span className="font-display-hero mt-3 flex flex-wrap justify-center gap-x-[0.26em] gap-y-1 font-extrabold text-[#F8FAFC] sm:mt-4 lg:justify-start">
+                {HERO_WORDS.map((word, idx) => {
+                  const isHighlight = word.toLowerCase().includes("interaktif");
+                  return (
+                    <span
+                      key={idx}
+                      className="inline-block overflow-hidden pb-1.5 sm:pb-2"
+                    >
+                      <span
+                        className={`hero-word-inner inline-block will-change-transform ${
+                          isHighlight ? "text-[#38BDF8]" : ""
+                        }`}
+                      >
+                        {word}
+                      </span>
+                    </span>
+                  );
+                })}
+              </span>
+            </h1>
 
-        <div className="hero-sub-reveal mx-auto mt-7 flex max-w-xs flex-col items-stretch justify-center gap-3 sm:mt-9 sm:max-w-none sm:flex-row sm:items-center sm:gap-4">
-          <a
-            ref={primaryBtnRef}
-            href="#projects"
-            className="inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-md bg-[#2563EB] px-6 py-3.5 text-sm font-semibold text-[#F8FAFC] shadow-[0_10px_34px_rgba(37,99,235,0.42)] transition-colors hover:bg-[#1D4ED8] sm:px-7"
-          >
-            <span>Lihat Karya</span>
-            <ArrowDownRight size={18} weight="bold" aria-hidden="true" />
-          </a>
+            <p className="hero-sub-reveal mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#CBD5E1] sm:mt-5 sm:text-lg lg:mx-0">
+              {PROFILE_DATA.heroSummary}
+            </p>
 
-          <a
-            ref={secondaryBtnRef}
-            href={PROFILE_DATA.cvUrl}
-            download="CV-Ilham-Dwi-Arsandy.pdf"
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-md border border-[#64748B] bg-[#0F172A]/90 px-6 py-3.5 text-sm font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8] hover:bg-[#131F38]"
-          >
-            <FilePdf
-              size={18}
-              weight="duotone"
-              className="text-[#38BDF8]"
-              aria-hidden="true"
-            />
-            <span>Unduh CV</span>
-          </a>
+            <div className="hero-sub-reveal mx-auto mt-7 flex max-w-xs flex-col items-stretch justify-center gap-3 sm:mt-9 sm:max-w-none sm:flex-row sm:items-center sm:gap-4 lg:mx-0 lg:justify-start">
+              <a
+                ref={primaryBtnRef}
+                href="#projects"
+                className="inline-flex min-h-[48px] items-center justify-center gap-2.5 rounded-md bg-[#2563EB] px-6 py-3.5 text-sm font-semibold text-[#F8FAFC] shadow-[0_10px_34px_rgba(37,99,235,0.42)] transition-colors hover:bg-[#1D4ED8] sm:px-7"
+              >
+                <span>Lihat Karya</span>
+                <ArrowDownRight size={18} weight="bold" aria-hidden="true" />
+              </a>
+
+              <a
+                ref={secondaryBtnRef}
+                href={PROFILE_DATA.cvUrl}
+                download="CV-Ilham-Dwi-Arsandy.pdf"
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-md border border-[#64748B] bg-[#0F172A]/90 px-6 py-3.5 text-sm font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8] hover:bg-[#131F38]"
+              >
+                <FilePdf
+                  size={18}
+                  weight="duotone"
+                  className="text-[#38BDF8]"
+                  aria-hidden="true"
+                />
+                <span>Unduh CV</span>
+              </a>
+            </div>
+          </div>
+
+          <div className="hidden lg:col-span-5 lg:flex lg:items-center lg:justify-center">
+            {showDesktop3D ? (
+              <HeroObservatory3D heroRef={sectionRef} />
+            ) : (
+              <div
+                aria-hidden="true"
+                className="flex h-[440px] w-full items-center justify-center xl:h-[500px]"
+              >
+                <div className="h-[310px] w-[310px] rounded-full border border-[#1E293B]/80 xl:h-[360px] xl:w-[360px]" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

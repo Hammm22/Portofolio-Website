@@ -10,7 +10,7 @@ import {
   Globe,
   DeviceMobile
 } from "@phosphor-icons/react";
-import { FEATURED_PROJECTS } from "@/data/portfolioData";
+import { FEATURED_PROJECTS } from "@/data/projectsData";
 import ProjectVisualStage from "@/components/sections/ProjectVisualStage";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -146,21 +146,70 @@ export default function FeaturedProjects() {
       mm.add(
         "(max-width: 1023px) and (prefers-reduced-motion: no-preference)",
         () => {
+          if (trackRef.current && progressBarRef.current) {
+            ScrollTrigger.create({
+              trigger: trackRef.current,
+              start: "top 68%",
+              end: "bottom 42%",
+              scrub: 0.3,
+              onUpdate: (self) => {
+                if (progressBarRef.current) {
+                  progressBarRef.current.style.transform = `scaleX(${self.progress})`;
+                }
+              }
+            });
+          }
+
           const cards = gsap.utils.toArray(".featured-project-card");
           cards.forEach((card, idx) => {
-            gsap.from(card, {
-              y: 28,
-              opacity: 0,
-              filter: "blur(4px)",
-              duration: 0.65,
-              ease: "power3.out",
-              clearProps: "transform,opacity,filter",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 86%",
-                once: true,
-                onEnter: () => setActiveSlide(idx)
+            gsap.set(card, { transformPerspective: 1100 });
+
+            // Mobile 3D Depth Card Scrub Entry
+            gsap.fromTo(
+              card,
+              { rotationX: 11, scale: 0.93, y: 38, opacity: 0.35 },
+              {
+                rotationX: 0,
+                scale: 1,
+                y: 0,
+                opacity: 1,
+                ease: "none",
+                clearProps: "transform,opacity",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 95%",
+                  end: "center 65%",
+                  scrub: 0.5
+                }
               }
+            );
+
+            // Subtle Counter-Parallax Inside Visual Mockup Stage
+            const stage = card.querySelector(".featured-project-stage");
+            if (stage) {
+              gsap.fromTo(
+                stage,
+                { y: 14 },
+                {
+                  y: -12,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 90%",
+                    end: "bottom 20%",
+                    scrub: 0.6
+                  }
+                }
+              );
+            }
+
+            // Bidirectional Slide Index Sync on Mobile Scroll
+            ScrollTrigger.create({
+              trigger: card,
+              start: "top 58%",
+              end: "bottom 42%",
+              onEnter: () => setActiveSlide((prev) => (prev === idx ? prev : idx)),
+              onEnterBack: () => setActiveSlide((prev) => (prev === idx ? prev : idx))
             });
           });
         }
@@ -219,7 +268,7 @@ export default function FeaturedProjects() {
 
             <div
               aria-hidden="true"
-              className="hidden h-[2px] w-full overflow-hidden rounded-full bg-[#1E293B] lg:block"
+              className="mt-1 h-[2px] w-full overflow-hidden rounded-full bg-[#1E293B]"
             >
               <div
                 ref={progressBarRef}
@@ -243,11 +292,11 @@ export default function FeaturedProjects() {
                 }}
                 onFocusCapture={() => handleCardFocus(idx)}
                 className={`featured-project-card flex flex-col justify-between rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 transition-colors duration-300 sm:p-6 lg:w-[840px] lg:shrink-0 ${
-                  isCurrent ? "lg:border-[#38BDF8]/65" : ""
+                  isCurrent ? "border-[#38BDF8]/55 lg:border-[#38BDF8]/65" : ""
                 }`}
               >
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-stretch lg:gap-7">
-                <div className="lg:col-span-6">
+                <div className="featured-project-stage lg:col-span-6">
                   <ProjectVisualStage projectId={project.id} />
                 </div>
 

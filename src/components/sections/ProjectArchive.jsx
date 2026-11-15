@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Flip } from "gsap/Flip";
 import { useGSAP } from "@gsap/react";
 import {
   MagnifyingGlass,
@@ -14,9 +15,9 @@ import {
   CaretDown,
   CaretUp
 } from "@phosphor-icons/react";
-import { ARCHIVE_PROJECTS, ARCHIVE_CATEGORIES } from "@/data/portfolioData";
+import { ARCHIVE_PROJECTS, ARCHIVE_CATEGORIES } from "@/data/projectsData";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip);
 
 const FEATURED_ARCHIVE_IDS = new Set([
   "arch-jejak-sehat-web",
@@ -30,10 +31,21 @@ export default function ProjectArchive() {
   const sectionRef = useRef(null);
   const inspectorCardRef = useRef(null);
   const isFirstInspectorRef = useRef(true);
+  const flipStateRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeProjectId, setActiveProjectId] = useState(ARCHIVE_PROJECTS[0].id);
   const [expandedRowId, setExpandedRowId] = useState(null);
+
+  const captureArchiveFlipState = () => {
+    if (
+      typeof window !== "undefined" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      sectionRef.current?.querySelector(".archive-row-item")
+    ) {
+      flipStateRef.current = Flip.getState(".archive-row-item");
+    }
+  };
 
   useGSAP(
     () => {
@@ -68,8 +80,75 @@ export default function ProjectArchive() {
           }
         });
       });
+      mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
+        const rows = gsap.utils.toArray(".archive-row-item");
+        rows.forEach((row) => {
+          gsap.fromTo(
+            row,
+            { x: -16, opacity: 0.45 },
+            {
+              x: 0,
+              opacity: 1,
+              ease: "none",
+              clearProps: "transform,opacity",
+              scrollTrigger: {
+                trigger: row,
+                start: "top 92%",
+                end: "top 72%",
+                scrub: 0.45
+              }
+            }
+          );
+        });
+      });
     },
     { scope: sectionRef }
+  );
+
+  useGSAP(
+    () => {
+      const state = flipStateRef.current;
+      flipStateRef.current = null;
+      if (!state) return;
+
+      if (
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        !sectionRef.current?.querySelector(".archive-row-item")
+      ) {
+        ScrollTrigger.refresh();
+        return;
+      }
+
+      Flip.from(state, {
+        targets: ".archive-row-item",
+        duration: 0.45,
+        stagger: 0.03,
+        ease: "power3.out",
+        scale: true,
+        simple: true,
+        onEnter: (elements) =>
+          gsap.fromTo(
+            elements,
+            { opacity: 0, y: 16, scale: 0.97 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.38,
+              stagger: 0.035,
+              ease: "power2.out",
+              clearProps: "transform,opacity"
+            }
+          ),
+        onComplete: () => {
+          ScrollTrigger.refresh();
+        }
+      });
+    },
+    {
+      scope: sectionRef,
+      dependencies: [selectedCategory, searchQuery, expandedRowId]
+    }
   );
 
   const filteredProjects = useMemo(() => {
@@ -90,6 +169,7 @@ export default function ProjectArchive() {
   }, [selectedCategory, searchQuery]);
 
   const handleResetFilters = () => {
+    captureArchiveFlipState();
     setSelectedCategory("Semua");
     setSearchQuery("");
     setActiveProjectId(ARCHIVE_PROJECTS[0].id);
@@ -156,7 +236,10 @@ export default function ProjectArchive() {
                   key={category}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => {
+                    captureArchiveFlipState();
+                    setSelectedCategory(category);
+                  }}
                   className={`inline-flex min-h-[44px] items-center rounded-md border px-4 py-2 text-xs font-medium transition-colors ${
                     isSelected
                       ? "border-[#38BDF8] bg-[#2563EB] text-[#F8FAFC]"
@@ -182,14 +265,20 @@ export default function ProjectArchive() {
               id="archive-search-input"
               type="search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                captureArchiveFlipState();
+                setSearchQuery(e.target.value);
+              }}
               placeholder="Cari proyek atau teknologi..."
               className="min-h-[44px] w-full rounded-md border border-[#64748B] bg-[#0F172A] py-2 pr-10 pl-10 text-sm text-[#F8FAFC] placeholder-[#94A3B8] transition-colors focus:border-[#38BDF8] focus:outline-none"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  captureArchiveFlipState();
+                  setSearchQuery("");
+                }}
                 aria-label="Bersihkan kata kunci pencarian"
                 className="absolute top-1/2 right-1.5 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded text-[#94A3B8] hover:text-[#F8FAFC]"
               >
@@ -253,6 +342,7 @@ export default function ProjectArchive() {
                     return (
                       <li
                         key={project.id}
+                        data-flip-id={project.id}
                         onClick={() => setActiveProjectId(project.id)}
                         className={`archive-row-item transition-colors lg:cursor-pointer ${
                           isSelectedPreview
@@ -294,6 +384,7 @@ export default function ProjectArchive() {
                               aria-controls={`archive-detail-${project.id}`}
                               onClick={(e) => {
                                 e.stopPropagation();
+                                captureArchiveFlipState();
                                 setExpandedRowId(isExpanded ? null : project.id);
                               }}
                               className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-[#64748B] bg-[#060B19] px-3 py-1.5 text-xs font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8] lg:hidden"

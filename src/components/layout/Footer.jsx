@@ -12,7 +12,7 @@ import {
   ArrowUp,
   EnvelopeSimple
 } from "@phosphor-icons/react";
-import { PROFILE_DATA } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
 
 gsap.registerPlugin(ScrollTrigger);
 

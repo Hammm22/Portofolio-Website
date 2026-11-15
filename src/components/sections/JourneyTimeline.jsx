@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { CheckCircle } from "@phosphor-icons/react";
-import { JOURNEY_CHAPTERS } from "@/data/portfolioData";
+import { JOURNEY_CHAPTERS } from "@/data/journeyData";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,6 +51,7 @@ export default function JourneyTimeline() {
         const chapters = gsap.utils.toArray(".journey-chapter-item");
         chapters.forEach((chapterEl) => {
           const dotEl = chapterEl.querySelector(".journey-dot");
+          const deliverables = chapterEl.querySelectorAll(".journey-deliverable");
 
           gsap.from(chapterEl, {
             x: -16,
@@ -64,6 +65,22 @@ export default function JourneyTimeline() {
               once: true
             }
           });
+
+          if (deliverables.length > 0) {
+            gsap.from(deliverables, {
+              x: -10,
+              opacity: 0,
+              duration: 0.45,
+              stagger: 0.08,
+              ease: "power2.out",
+              clearProps: "transform,opacity",
+              scrollTrigger: {
+                trigger: chapterEl,
+                start: "top 78%",
+                once: true
+              }
+            });
+          }
 
           if (dotEl) {
             gsap.fromTo(
@@ -146,7 +163,7 @@ export default function JourneyTimeline() {
                       {chapter.deliverables.map((point) => (
                         <li
                           key={point}
-                          className="flex items-start gap-2 text-sm text-[#CBD5E1]"
+                          className="journey-deliverable flex items-start gap-2 text-sm text-[#CBD5E1]"
                         >
                           <CheckCircle
                             size={16}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,41 +8,52 @@ import { useGSAP } from "@gsap/react";
 import {
   ArrowsClockwise,
   ArrowUpRight,
-  GithubLogo
+  Atom,
+  BracketsCurly,
+  CloudArrowUp,
+  Code,
+  CodeBlock,
+  Coffee,
+  Cpu,
+  Cube,
+  DeviceMobile,
+  FigmaLogo,
+  FileJs,
+  GitBranch,
+  GithubLogo,
+  Hexagon,
+  PaperPlaneTilt,
+  Polygon,
+  Sparkle,
+  Triangle,
+  Wind
 } from "@phosphor-icons/react";
-import { PROFILE_DATA, SKILL_GROUPS } from "@/data/portfolioData";
+import { PROFILE_DATA } from "@/data/profileData";
+import { SKILL_GROUPS } from "@/data/techData";
+import { useGithubProfile } from "@/hooks/useGithubProfile";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const GITHUB_CACHE_KEY = "hammm22_github_profile_v1";
-const GITHUB_CACHE_TTL_MS = 30 * 60 * 1000;
-
-function readGithubCache() {
-  try {
-    const raw = window.localStorage.getItem(GITHUB_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (
-      !parsed ||
-      typeof parsed.fetchedAt !== "number" ||
-      !parsed.data ||
-      Date.now() - parsed.fetchedAt > GITHUB_CACHE_TTL_MS
-    ) {
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeGithubCache(payload) {
-  try {
-    window.localStorage.setItem(GITHUB_CACHE_KEY, JSON.stringify(payload));
-  } catch {
-    // Abaikan jika penyimpanan browser dibatasi (mis. mode privat)
-  }
-}
+const SKILL_ICONS = {
+  FileJs,
+  Atom,
+  Triangle,
+  Polygon,
+  Wind,
+  Sparkle,
+  BracketsCurly,
+  Cube,
+  Hexagon,
+  DeviceMobile,
+  Coffee,
+  Cpu,
+  GitBranch,
+  GithubLogo,
+  CodeBlock,
+  FigmaLogo,
+  PaperPlaneTilt,
+  CloudArrowUp
+};
 
 export default function AboutSection() {
   const sectionRef = useRef(null);
@@ -54,16 +65,8 @@ export default function AboutSection() {
   const followerCountRef = useRef(null);
   const followingCountRef = useRef(null);
   const hasEnteredStatsRef = useRef(false);
-  const abortRef = useRef(null);
 
-  const [githubState, setGithubState] = useState({
-    status: "loading",
-    updatedAt: null,
-    error: null,
-    data: PROFILE_DATA.fallbackGithubStats
-  });
-
-  const stats = githubState.data;
+  const { githubState, stats, refreshGithubProfile } = useGithubProfile();
   const latestStatsRef = useRef(stats);
 
   const animateCounters = useCallback((targetStats, fromZero = false) => {
@@ -96,115 +99,6 @@ export default function AboutSection() {
       });
     });
   }, []);
-
-  const loadGithubStats = useCallback(async (signal, bypassCache = false) => {
-    if (!bypassCache) {
-      const cached = readGithubCache();
-      if (cached) {
-        return {
-          status: "success",
-          updatedAt: cached.updatedAt || null,
-          error: null,
-          data: cached.data
-        };
-      }
-    }
-
-    try {
-      const response = await fetch(PROFILE_DATA.githubApiUrl, {
-        headers: {
-          Accept: "application/vnd.github.v3+json"
-        },
-        ...(bypassCache ? { cache: "no-store" } : {}),
-        signal
-      });
-
-      if (!response.ok) {
-        throw new Error(`Status HTTP ${response.status}`);
-      }
-
-      const json = await response.json();
-      const updatedAt = new Intl.DateTimeFormat("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit"
-      }).format(new Date());
-
-      const nextData = {
-        public_repos:
-          typeof json.public_repos === "number"
-            ? json.public_repos
-            : PROFILE_DATA.fallbackGithubStats.public_repos,
-        followers:
-          typeof json.followers === "number"
-            ? json.followers
-            : PROFILE_DATA.fallbackGithubStats.followers,
-        following:
-          typeof json.following === "number"
-            ? json.following
-            : PROFILE_DATA.fallbackGithubStats.following,
-        login: json.login || PROFILE_DATA.handle,
-        html_url: json.html_url || PROFILE_DATA.githubUrl,
-        bio: json.bio || PROFILE_DATA.fallbackGithubStats.bio
-      };
-
-      writeGithubCache({
-        fetchedAt: Date.now(),
-        updatedAt,
-        data: nextData
-      });
-
-      return {
-        status: "success",
-        updatedAt,
-        error: null,
-        data: nextData
-      };
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
-        return null;
-      }
-      return {
-        status: "error",
-        updatedAt: null,
-        error: err instanceof Error ? err.message : "Kendala jaringan",
-        data: PROFILE_DATA.fallbackGithubStats
-      };
-    }
-  }, []);
-
-  const fetchGithubProfile = useCallback(async () => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setGithubState((prev) => ({
-      ...prev,
-      status: "loading",
-      error: null
-    }));
-
-    const nextState = await loadGithubStats(controller.signal, true);
-    if (nextState && !controller.signal.aborted) {
-      setGithubState(nextState);
-    }
-  }, [loadGithubStats]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    loadGithubStats(controller.signal).then((nextState) => {
-      if (nextState && !controller.signal.aborted) {
-        setGithubState(nextState);
-      }
-    });
-
-    return () => {
-      controller.abort();
-    };
-  }, [loadGithubStats]);
 
   useEffect(() => {
     latestStatsRef.current = stats;
@@ -260,10 +154,11 @@ export default function AboutSection() {
         });
 
         gsap.from(".about-skill-item", {
-          x: -16,
+          y: 16,
+          scale: 0.94,
           opacity: 0,
-          duration: 0.55,
-          stagger: 0.09,
+          duration: 0.5,
+          stagger: { each: 0.035, from: "start" },
           ease: "power3.out",
           clearProps: "transform,opacity",
           scrollTrigger: {
@@ -354,6 +249,40 @@ export default function AboutSection() {
           };
         }
       );
+
+      mm.add(
+        "(max-width: 1023px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const card = portraitCardRef.current;
+          const glare = portraitGlareRef.current;
+          if (!card) return undefined;
+
+          gsap.fromTo(
+            card,
+            { rotationX: 7, y: 18 },
+            {
+              rotationX: -3,
+              y: -10,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 88%",
+                end: "bottom 20%",
+                scrub: 0.65,
+                onUpdate: (self) => {
+                  if (!glare) return;
+                  const gy = Math.round(15 + self.progress * 70);
+                  glare.style.background = `radial-gradient(320px circle at 52% ${gy}%, rgba(56, 189, 248, 0.2), transparent 72%)`;
+                  glare.style.opacity =
+                    self.progress > 0.05 && self.progress < 0.95 ? "1" : "0";
+                }
+              }
+            }
+          );
+
+          return undefined;
+        }
+      );
     },
     { scope: sectionRef }
   );
@@ -386,30 +315,56 @@ export default function AboutSection() {
               ))}
             </div>
 
-            {/* Clean Hairline Skill List */}
+            {/* Icon Grid Skill Showcase */}
             <div className="about-reveal border-t border-[#1E293B] pt-7 sm:pt-8">
               <h3 className="font-display text-lg font-bold text-[#F8FAFC] sm:text-xl">
                 Keahlian &amp; Teknologi
               </h3>
 
-              <div className="about-skills-list mt-4 space-y-0 sm:mt-5">
+              <div className="about-skills-list mt-4 space-y-5 sm:mt-5">
                 {SKILL_GROUPS.map((group, idx) => (
-                  <div
-                    key={group.id}
-                    className="about-skill-item py-4 first:pt-0 last:pb-0"
-                  >
+                  <div key={group.id} className="about-skill-group">
                     {idx > 0 && (
                       <div
                         aria-hidden="true"
-                        className="about-skill-divider mb-4 h-px w-full bg-[#1E293B]"
+                        className="about-skill-divider mb-5 h-px w-full bg-[#1E293B]"
                       />
                     )}
-                    <h4 className="font-display text-base font-bold text-[#F8FAFC]">
+                    <h4 className="font-display text-sm font-bold tracking-wide text-[#F8FAFC] sm:text-base">
                       {group.title}
                     </h4>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[#CBD5E1]">
-                      {group.items.join(" · ")}
-                    </p>
+
+                    <ul className="mt-3 grid grid-cols-3 gap-2.5 sm:grid-cols-6 md:grid-cols-3 lg:grid-cols-6 lg:gap-2.5">
+                      {group.items.map((item) => {
+                        const skill =
+                          typeof item === "string"
+                            ? { id: item, label: item, fullLabel: item, icon: "Code" }
+                            : item;
+                        const IconComponent = SKILL_ICONS[skill.icon] || Code;
+
+                        return (
+                          <li
+                            key={skill.id}
+                            title={
+                              skill.fullLabel && skill.fullLabel !== skill.label
+                                ? skill.fullLabel
+                                : undefined
+                            }
+                            className="about-skill-item group flex min-h-[78px] flex-col items-center justify-center gap-2 rounded-lg border border-[#1E293B] bg-[#0F172A]/80 px-1.5 py-3 text-center transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-[#38BDF8] hover:bg-[#0F172A]"
+                          >
+                            <IconComponent
+                              size={24}
+                              weight="duotone"
+                              aria-hidden="true"
+                              className="shrink-0 text-[#38BDF8] transition-transform duration-200 group-hover:scale-110"
+                            />
+                            <span className="text-[11px] font-medium leading-tight text-[#CBD5E1] transition-colors duration-200 group-hover:text-[#F8FAFC] sm:text-xs">
+                              {skill.label}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 ))}
               </div>
@@ -437,7 +392,7 @@ export default function AboutSection() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={fetchGithubProfile}
+                    onClick={refreshGithubProfile}
                     disabled={githubState.status === "loading"}
                     aria-label="Segarkan data GitHub"
                     className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-[#64748B] bg-[#0F172A] px-3 py-2 text-xs font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8] disabled:opacity-60"
@@ -493,7 +448,7 @@ export default function AboutSection() {
                     </span>
                     <button
                       type="button"
-                      onClick={fetchGithubProfile}
+                      onClick={refreshGithubProfile}
                       className="inline-flex min-h-[44px] items-center rounded border border-[#64748B] bg-[#060B19] px-3 py-1.5 font-medium text-[#38BDF8] transition-colors hover:border-[#38BDF8]"
                     >
                       Coba Lagi
@@ -541,7 +496,6 @@ export default function AboutSection() {
           <div className="order-1 mx-auto w-full max-w-sm md:sticky md:top-24 md:order-2 md:col-span-5 md:max-w-none [perspective:1100px]">
             <figure
               ref={portraitCardRef}
-              data-cursor-hover
               className="relative overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-[0_20px_50px_rgba(6,11,25,0.65)] transition-colors hover:border-[#38BDF8] [transform-style:preserve-3d]"
             >
               <div
