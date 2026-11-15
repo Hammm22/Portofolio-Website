@@ -1,51 +1,49 @@
 export const CERTIFICATE_CATEGORIES = [
   "Semua",
-  "Web & Frontend",
-  "Mobile & Android",
-  "Backend & Sistem",
-  "Kompetensi PPLG"
+  "Cloud & AWS",
+  "Mobile & Android"
 ];
 
 // Simpan foto sertifikat aslimu di public/images/certificates/ lalu sesuaikan properti imageUrl di bawah:
 export const CERTIFICATES = [
   {
-    id: "cert-frontend-web",
+    id: "aws-job-roles-cloud",
     index: "01",
-    title: "Rekayasa Frontend & Web Modern",
-    issuer: "Program Kompetensi PPLG & Mandiri",
-    date: "2026",
-    category: "Web & Frontend",
-    credentialCode: "PPLG-FE-2026-01",
-    skills: ["React.js", "Next.js", "Tailwind CSS", "GSAP"],
+    title: "Job Roles in the Cloud",
+    issuer: "AWS Training & Certification",
+    date: "28 Juli 2026",
+    category: "Cloud & AWS",
+    credentialCode: "Completion Certificate",
+    skills: ["Cloud Computing", "Cloud Roles", "AWS Cloud", "Cloud Operations"],
     summary:
-      "Validasi perancangan antarmuka web modern berbasis komponen, tata letak responsif lintas layar, serta penerapan aksesibilitas WCAG AA dan animasi interaktif.",
-    imageUrl: "/images/certificates/cert-frontend-web.svg"
+      "Sertifikat penyelesaian dari AWS Training & Certification yang membahas berbagai peran profesional di ekosistem cloud computing modern, pembagian tanggung jawab tim, serta alur kolaborasi pada infrastruktur AWS.",
+    imageUrl: "/images/certificates/cert1.png"
   },
   {
-    id: "cert-flutter-mobile",
+    id: "aws-compute-services",
     index: "02",
-    title: "Pengembangan Mobile Lintas Platform (Flutter & Dart)",
-    issuer: "Modul Praktik Perangkat Bergerak PPLG",
-    date: "2026",
-    category: "Mobile & Android",
-    credentialCode: "PPLG-FL-2026-02",
-    skills: ["Dart", "Flutter", "Mobile UI", "State Management"],
+    title: "AWS Compute Services Overview",
+    issuer: "AWS Training & Certification",
+    date: "27 Juli 2026",
+    category: "Cloud & AWS",
+    credentialCode: "Completion Certificate",
+    skills: ["AWS Compute", "Amazon EC2", "AWS Lambda", "Container Services"],
     summary:
-      "Sertifikasi kompetensi pengembangan aplikasi perangkat bergerak menggunakan kerangka kerja Flutter dan bahasa Dart yang diterapkan langsung pada ekosistem Jejak Sehat Mobile.",
-    imageUrl: "/images/certificates/cert-flutter-mobile.svg"
+      "Sertifikat penyelesaian dari AWS Training & Certification mengenai pengenalan layanan komputasi utama di AWS, meliputi virtual server, komputasi serverless, serta layanan kontainer sesuai kebutuhan beban kerja aplikasi.",
+    imageUrl: "/images/certificates/cert2.png"
   },
   {
-    id: "cert-laravel-backend",
+    id: "aws-technical-essentials",
     index: "03",
-    title: "Arsitektur Backend MVC Laravel & Basis Data SQL",
-    issuer: "Laboratorium Rekayasa Perangkat Lunak",
-    date: "2026",
-    category: "Backend & Sistem",
-    credentialCode: "PPLG-BE-2026-03",
-    skills: ["PHP", "Laravel", "MySQL", "PostgreSQL", "Prisma"],
+    title: "AWS Technical Essentials",
+    issuer: "AWS Training & Certification",
+    date: "28 Juli 2026",
+    category: "Cloud & AWS",
+    credentialCode: "Completion Certificate",
+    skills: ["AWS Core Services", "IAM Security", "Cloud Networking", "Cloud Storage"],
     summary:
-      "Penguasaan pola arsitektur Model-View-Controller (MVC), perancangan skema relasional, autentikasi pengguna, serta manajemen rute CRUD pada aplikasi Ketemuin.com.",
-    imageUrl: "/images/certificates/cert-laravel-backend.svg"
+      "Sertifikat penyelesaian fondasi teknis AWS Training & Certification yang mencakup layanan komputasi inti, manajemen akses dan keamanan (IAM), jaringan dasar, serta solusi penyimpanan dan basis data di cloud.",
+    imageUrl: "/images/certificates/cert3.png"
   },
   {
     id: "cert-android-java",

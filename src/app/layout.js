@@ -31,7 +31,10 @@ const SEO_DESCRIPTION =
 
 export const metadata = {
   metadataBase: new URL(PROFILE_DATA.siteUrl),
-  title: SEO_TITLE,
+  title: {
+    default: SEO_TITLE,
+    template: `%s | ${PROFILE_DATA.name} (${PROFILE_DATA.handle})`
+  },
   description: SEO_DESCRIPTION,
   alternates: {
     canonical: "/"

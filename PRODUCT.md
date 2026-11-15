@@ -30,7 +30,7 @@ Portofolio siswa SMK PPLG yang menggabungkan dokumentasi rekayasa lintas platfor
 - **Stack Teknis Terkunci:** Next.js (App Router) dengan JavaScript murni (`.js` / `.jsx`, tanpa TypeScript), Tailwind CSS, GSAP (`@gsap/react`, `ScrollTrigger`, `Flip`), Three.js (`three`, lazy-load khusus Hero desktop `>= 1024px`), Lenis Smooth Scroll, dan `@phosphor-icons/react`.
 - **Integrasi Data Nyata:** Mengambil statistik profil publik secara langsung dari `https://api.github.com/users/Hammm22` disertai fallback data terverifikasi saat API mengalami batas pemanggilan (*rate limit*) atau kendala jaringan.
 - **Kejujuran Bukti:** Hanya menampilkan proyek yang benar-benar ada di akun GitHub `Hammm22`. Dilarang menambahkan testimoni fiktif, metrik perusahaan karangan, atau tautan kosong.
-- **Fakta Terbuka (Menunggu Input Pengguna):** Nama spesifik sekolah SMK dan alamat email resmi (saat ini masih menggunakan label umum `Siswa SMK Jurusan PPLG` dan placeholder `ilhamdwiarsandy@gmail.com` hingga pengguna mengirimkan detail resminya).
+- **Fakta Terbuka (Menunggu Input Pengguna):** Nama spesifik sekolah SMK, tautan LinkedIn, foto profil, scan sertifikat asli, dan pengisian penuh berkas PDF CV (email aktif saat ini memakai `ilhamdwiarsandy61@gmail.com`).
 
 ## Brand Commitments
 

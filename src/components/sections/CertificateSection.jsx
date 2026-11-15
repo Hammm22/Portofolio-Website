@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -394,7 +395,8 @@ export default function CertificateSection() {
                       alt={`Foto sertifikat ${cert.title}`}
                       width={880}
                       height={605}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 400px"
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                     <span className="absolute right-2.5 bottom-2.5 inline-flex items-center gap-1.5 rounded bg-[#060B19]/90 px-2.5 py-1.5 text-xs font-medium text-[#F8FAFC] backdrop-blur-sm">
                       <ArrowsOutSimple
@@ -431,63 +433,71 @@ export default function CertificateSection() {
         )}
       </div>
 
-      {/* Lightbox Modal Zoom */}
-      {selectedCert && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="cert-modal-title"
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-[#060B19]/90 p-3 backdrop-blur-md sm:p-6"
-          onClick={() => setSelectedCert(null)}
-        >
+      {/* Lightbox Modal Zoom via Portal agar tidak terjebak stacking context main z-10 */}
+      {selectedCert &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            ref={modalDialogRef}
-            className="max-h-[92dvh] w-full max-w-4xl overflow-y-auto rounded-lg border border-[#64748B] bg-[#0F172A] p-4 shadow-2xl sm:p-7"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cert-modal-title"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-[#060B19]/90 p-4 backdrop-blur-md sm:p-6"
+            onClick={() => setSelectedCert(null)}
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#1E293B] pb-4">
-              <div>
-                <p className="font-mono text-xs text-[#38BDF8]">
-                  {selectedCert.issuer} · {selectedCert.date} · {selectedCert.credentialCode}
-                </p>
-                <h3
-                  id="cert-modal-title"
-                  className="mt-1 font-display text-xl font-bold text-[#F8FAFC] sm:text-2xl"
+            <div
+              ref={modalDialogRef}
+              data-lenis-prevent
+              className="max-h-[84dvh] w-full max-w-2xl overflow-y-auto rounded-lg border border-[#64748B] bg-[#0F172A] p-4 shadow-2xl sm:p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1E293B] pb-3.5">
+                <div className="min-w-0">
+                  <p className="font-mono text-xs text-[#38BDF8]">
+                    {selectedCert.issuer} · {selectedCert.date}
+                    {selectedCert.credentialCode
+                      ? ` · ${selectedCert.credentialCode}`
+                      : ""}
+                  </p>
+                  <h3
+                    id="cert-modal-title"
+                    className="mt-1 font-display text-lg font-bold text-[#F8FAFC] sm:text-xl"
+                  >
+                    {selectedCert.title}
+                  </h3>
+                </div>
+
+                <button
+                  ref={closeBtnRef}
+                  type="button"
+                  onClick={() => setSelectedCert(null)}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-[#64748B] bg-[#060B19] px-3.5 py-2 text-xs font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8]"
                 >
-                  {selectedCert.title}
-                </h3>
+                  <X size={16} weight="bold" aria-hidden="true" />
+                  <span>Tutup</span>
+                </button>
               </div>
 
-              <button
-                ref={closeBtnRef}
-                type="button"
-                onClick={() => setSelectedCert(null)}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-[#64748B] bg-[#060B19] px-4 py-2 text-xs font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8]"
-              >
-                <X size={16} weight="bold" aria-hidden="true" />
-                <span>Tutup</span>
-              </button>
-            </div>
+              <div className="mt-4 flex justify-center overflow-hidden rounded-md bg-[#060B19] p-2">
+                <Image
+                  src={selectedCert.imageUrl}
+                  alt={`Pratinjau penuh sertifikat ${selectedCert.title}`}
+                  width={1200}
+                  height={927}
+                  sizes="(max-width: 767px) 92vw, 640px"
+                  className="max-h-[46dvh] w-auto max-w-full object-contain sm:max-h-[52dvh]"
+                />
+              </div>
 
-            <div className="mt-5 overflow-hidden rounded-md bg-[#060B19]">
-              <Image
-                src={selectedCert.imageUrl}
-                alt={`Pratinjau penuh sertifikat ${selectedCert.title}`}
-                width={880}
-                height={605}
-                className="h-auto w-full object-contain"
-              />
+              <p className="mt-4 text-sm leading-relaxed text-[#CBD5E1]">
+                {selectedCert.summary}
+              </p>
+              <p className="mt-3 border-t border-[#1E293B] pt-3 font-mono text-xs text-[#94A3B8]">
+                Kompetensi: {selectedCert.skills.join(" · ")}
+              </p>
             </div>
-
-            <p className="mt-4 text-sm leading-relaxed text-[#CBD5E1]">
-              {selectedCert.summary}
-            </p>
-            <p className="mt-3 border-t border-[#1E293B] pt-3 font-mono text-xs text-[#94A3B8]">
-              Kompetensi: {selectedCert.skills.join(" · ")}
-            </p>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

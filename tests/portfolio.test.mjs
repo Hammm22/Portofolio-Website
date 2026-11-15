@@ -11,6 +11,10 @@ import {
 } from "../src/data/projectsData.js";
 import { CERTIFICATES } from "../src/data/certificatesData.js";
 import { JOURNEY_CHAPTERS } from "../src/data/journeyData.js";
+import {
+  parseGithubContributionsHtml,
+  parseGithubGraphqlCalendar
+} from "../src/lib/githubContributions.js";
 
 const ROOT = process.cwd();
 
@@ -28,23 +32,17 @@ function listFilesRecursive(dirPath) {
   return results;
 }
 
-test("semua ikon SKILL_GROUPS terpetakan di AboutSection.jsx dan tersedia di Phosphor", () => {
-  const aboutSource = fs.readFileSync(
-    path.join(ROOT, "src/components/sections/AboutSection.jsx"),
+test("semua ikon SKILL_GROUPS terpetakan di TechStackIcon.jsx", () => {
+  const iconSource = fs.readFileSync(
+    path.join(ROOT, "src/components/ui/TechStackIcon.jsx"),
     "utf8"
   );
-  const blockMatch = aboutSource.match(/const SKILL_ICONS\s*=\s*\{([\s\S]*?)\};/);
-  assert.ok(blockMatch, "Blok SKILL_ICONS harus ada di AboutSection.jsx");
+  const blockMatch = iconSource.match(/export const TECH_STACK_KEYS\s*=\s*\[([\s\S]*?)\];/);
+  assert.ok(blockMatch, "TECH_STACK_KEYS harus diekspor di TechStackIcon.jsx");
 
-  const mappedIcons = new Set(
-    blockMatch[1]
-      .split(",")
-      .map((token) => token.trim())
-      .filter(Boolean)
+  const registeredKeys = new Set(
+    [...blockMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1])
   );
-
-  const csrDir = path.join(ROOT, "node_modules/@phosphor-icons/react/dist/csr");
-  const hasNodeModules = fs.existsSync(csrDir);
 
   assert.ok(SKILL_GROUPS.length > 0, "SKILL_GROUPS tidak boleh kosong");
   for (const group of SKILL_GROUPS) {
@@ -52,22 +50,26 @@ test("semua ikon SKILL_GROUPS terpetakan di AboutSection.jsx dan tersedia di Pho
     for (const skill of group.items) {
       assert.ok(skill.id && skill.label && skill.fullLabel, "Properti skill tidak lengkap");
       assert.ok(
-        mappedIcons.has(skill.icon),
-        `Ikon "${skill.icon}" untuk "${skill.label}" belum didaftarkan di SKILL_ICONS`
+        registeredKeys.has(skill.icon),
+        `Ikon "${skill.icon}" untuk "${skill.label}" belum terdaftar di TechStackIcon.jsx`
       );
-      if (hasNodeModules) {
-        assert.ok(
-          fs.existsSync(path.join(csrDir, `${skill.icon}.d.ts`)),
-          `Ekspor @phosphor-icons/react untuk "${skill.icon}" tidak ditemukan`
-        );
-      }
+      assert.ok(
+        iconSource.includes(`case "${skill.icon}":`),
+        `Cabang switch untuk "${skill.icon}" belum ada di TechStackIcon.jsx`
+      );
     }
   }
 });
 
 test("aset lokal di folder public tersedia untuk profil, CV, dan sertifikat", () => {
+  assert.ok(
+    Array.isArray(PROFILE_DATA.aboutPhotos) && PROFILE_DATA.aboutPhotos.length >= 2,
+    "PROFILE_DATA.aboutPhotos minimal berisi 2 slot foto"
+  );
+
   const assetPaths = [
     PROFILE_DATA.photoUrl,
+    ...PROFILE_DATA.aboutPhotos.map((photo) => photo.src),
     PROFILE_DATA.cvUrl,
     ...CERTIFICATES.map((cert) => cert.imageUrl)
   ];
@@ -88,7 +90,9 @@ test("tidak ada karakter em-dash (U+2014) pada kode sumber dan aset teks", () =>
     path.join(ROOT, "next.config.mjs"),
     path.join(ROOT, "public/llms.txt"),
     ...listFilesRecursive(path.join(ROOT, "src")),
-    ...listFilesRecursive(path.join(ROOT, "public/images"))
+    ...listFilesRecursive(path.join(ROOT, "public/images")).filter((filePath) =>
+      filePath.endsWith(".svg")
+    )
   ];
 
   for (const filePath of filesToScan) {
@@ -116,7 +120,7 @@ test("tidak ada tautan kosong href='#' atau data perjalanan kosong", () => {
   assert.ok(JOURNEY_CHAPTERS.length >= 3, "JOURNEY_CHAPTERS minimal 3 bab");
 });
 
-test("tidak ada sisa impor komponen dan tautan section yang sudah dihapus", () => {
+test("tidak ada sisa impor section usang dan seluruh gambar & header keamanan terpasang", () => {
   const deprecatedTokens = [
     "ServicesSection",
     "WorkflowSection",
@@ -135,10 +139,89 @@ test("tidak ada sisa impor komponen dan tautan section yang sudah dihapus", () =
         `Referensi usang "${token}" masih ada di ${path.relative(ROOT, filePath)}`
       );
     }
+
+    const imageMatches = [...content.matchAll(/<Image[\s\S]*?\/>/g)];
+    for (const match of imageMatches) {
+      assert.ok(
+        match[0].includes("sizes="),
+        `Komponen <Image> di ${path.relative(ROOT, filePath)} wajib mencantumkan prop sizes`
+      );
+    }
   }
 
-  assert.ok(
-    fs.existsSync(path.join(ROOT, "src/app/not-found.js")),
-    "Halaman 404 kustom src/app/not-found.js harus ada"
-  );
+  const nextConfigSource = fs.readFileSync(path.join(ROOT, "next.config.mjs"), "utf8");
+  for (const headerName of ["X-Content-Type-Options", "X-Frame-Options", "Referrer-Policy"]) {
+    assert.ok(
+      nextConfigSource.includes(headerName),
+      `Header keamanan ${headerName} belum diatur di next.config.mjs`
+    );
+  }
+
+  for (const requiredFile of [
+    "src/app/not-found.js",
+    "src/app/manifest.js",
+    "src/app/apple-icon.js",
+    "src/app/api/github-contributions/route.js",
+    ".github/workflows/ci.yml"
+  ]) {
+    assert.ok(
+      fs.existsSync(path.join(ROOT, requiredFile)),
+      `File wajib ${requiredFile} belum ada`
+    );
+  }
+});
+
+test("parseGithubContributionsHtml dan GraphQL normalizer mengurai kalender kontribusi dengan tepat", () => {
+  const sampleHtml = `
+    <h2 id="js-contribution-activity-description" class="f4 text-normal mb-2">
+      131 contributions in the last year
+    </h2>
+    <table>
+      <tbody>
+        <tr>
+          <td id="c-0" data-date="2026-11-08" data-level="0" class="ContributionCalendar-day"></td>
+          <td data-level="2" id="c-1" data-date="2026-11-09" class="ContributionCalendar-day"></td>
+          <td id="c-2" data-date="2026-11-14" data-level="4" class="ContributionCalendar-day"></td>
+        </tr>
+      </tbody>
+    </table>
+    <tool-tip for="c-0">No contributions on November 8th.</tool-tip>
+    <tool-tip data-type="label" for="c-1">1 contribution on November 9th.</tool-tip>
+    <tool-tip for="c-2">7 contributions on November 14th.</tool-tip>
+  `;
+
+  const parsed = parseGithubContributionsHtml(sampleHtml);
+  assert.ok(parsed, "HTML valid harus menghasilkan objek kalender");
+  assert.equal(parsed.source, "github-html");
+  assert.equal(parsed.totalContributions, 131);
+  assert.equal(parsed.rangeStart, "2026-11-08");
+  assert.equal(parsed.rangeEnd, "2026-11-14");
+  assert.equal(parsed.weeks.length, 1);
+  assert.equal(parsed.weeks[0].length, 7);
+  assert.deepEqual(parsed.weeks[0][0], { date: "2026-11-08", count: 0, level: 0 });
+  assert.deepEqual(parsed.weeks[0][1], { date: "2026-11-09", count: 1, level: 2 });
+  assert.equal(parsed.weeks[0][2], null);
+  assert.deepEqual(parsed.weeks[0][6], { date: "2026-11-14", count: 7, level: 4 });
+
+  assert.equal(parseGithubContributionsHtml(""), null);
+  assert.equal(parseGithubContributionsHtml("<div>kosong</div>"), null);
+
+  const gqlParsed = parseGithubGraphqlCalendar({
+    totalContributions: 12,
+    weeks: [
+      {
+        contributionDays: [
+          {
+            date: "2026-11-14",
+            contributionCount: 12,
+            contributionLevel: "FOURTH_QUARTILE"
+          }
+        ]
+      }
+    ]
+  });
+  assert.ok(gqlParsed);
+  assert.equal(gqlParsed.source, "github-graphql");
+  assert.equal(gqlParsed.totalContributions, 12);
+  assert.deepEqual(gqlParsed.weeks[0][6], { date: "2026-11-14", count: 12, level: 4 });
 });

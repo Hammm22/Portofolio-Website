@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -10,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function HeroObservatory3D({ heroRef }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const [webglUnavailable, setWebglUnavailable] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -25,8 +26,21 @@ export default function HeroObservatory3D({ heroRef }) {
         powerPreference: "high-performance"
       });
     } catch {
+      queueMicrotask(() => setWebglUnavailable(true));
       return undefined;
     }
+
+    const handleContextLost = (e) => {
+      e.preventDefault();
+      setWebglUnavailable(true);
+    };
+
+    const handleContextRestored = () => {
+      setWebglUnavailable(false);
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setClearColor(0x000000, 0);
@@ -319,6 +333,8 @@ export default function HeroObservatory3D({ heroRef }) {
       canvas.removeEventListener("pointerup", handlePointerUp);
       canvas.removeEventListener("pointercancel", handlePointerUp);
       canvas.removeEventListener("pointerleave", handlePointerLeave);
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
 
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose();
@@ -346,14 +362,25 @@ export default function HeroObservatory3D({ heroRef }) {
         className="pointer-events-none absolute h-[310px] w-[310px] rounded-full border border-[#1E293B]/80 xl:h-[360px] xl:w-[360px]"
       />
 
-      <canvas
-        ref={canvasRef}
-        className="relative z-10 h-full w-full cursor-grab opacity-0 active:cursor-grabbing"
-      />
+      {webglUnavailable ? (
+        <div
+          aria-hidden="true"
+          className="relative z-10 flex h-[230px] w-[230px] items-center justify-center rounded-full border border-dashed border-[#38BDF8]/45 xl:h-[260px] xl:w-[260px]"
+        >
+          <div className="h-[130px] w-[130px] rotate-45 rounded-xl border border-[#2563EB]/60 bg-[#0F172A]/45" />
+        </div>
+      ) : (
+        <>
+          <canvas
+            ref={canvasRef}
+            className="relative z-10 h-full w-full cursor-grab opacity-0 active:cursor-grabbing"
+          />
 
-      <p className="pointer-events-none absolute right-2 bottom-2 z-20 rounded-full border border-[#1E293B] bg-[#0F172A]/85 px-3 py-1 font-mono text-[11px] text-[#94A3B8] backdrop-blur-sm">
-        3D Observatorium · Tarik untuk memutar
-      </p>
+          <p className="pointer-events-none absolute right-2 bottom-2 z-20 rounded-full border border-[#1E293B] bg-[#0F172A]/85 px-3 py-1 font-mono text-[11px] text-[#94A3B8] backdrop-blur-sm">
+            3D Observatorium · Tarik untuk memutar
+          </p>
+        </>
+      )}
     </div>
   );
 }

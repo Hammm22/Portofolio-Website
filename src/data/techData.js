@@ -4,12 +4,12 @@ export const SKILL_GROUPS = [
     title: "Frontend & Antarmuka",
     description: "Arsitektur komponen, tata letak responsif, dan animasi interaktif.",
     items: [
-      { id: "javascript", label: "JavaScript", fullLabel: "JavaScript (ES6+)", icon: "FileJs" },
-      { id: "react", label: "React.js", fullLabel: "React.js", icon: "Atom" },
-      { id: "nextjs", label: "Next.js", fullLabel: "Next.js", icon: "Triangle" },
-      { id: "vuejs", label: "Vue.js", fullLabel: "Vue.js", icon: "Polygon" },
-      { id: "tailwind", label: "Tailwind", fullLabel: "Tailwind CSS", icon: "Wind" },
-      { id: "gsap", label: "GSAP", fullLabel: "GSAP & ScrollTrigger", icon: "Sparkle" }
+      { id: "javascript", label: "JavaScript", fullLabel: "JavaScript (ES6+)", icon: "javascript" },
+      { id: "react", label: "React.js", fullLabel: "React.js", icon: "react" },
+      { id: "nextjs", label: "Next.js", fullLabel: "Next.js", icon: "nextjs" },
+      { id: "vuejs", label: "Vue.js", fullLabel: "Vue.js", icon: "vuejs" },
+      { id: "tailwind", label: "Tailwind", fullLabel: "Tailwind CSS", icon: "tailwind" },
+      { id: "gsap", label: "GSAP", fullLabel: "GSAP & ScrollTrigger", icon: "gsap" }
     ]
   },
   {
@@ -17,12 +17,12 @@ export const SKILL_GROUPS = [
     title: "Backend & Mobile",
     description: "Pengembangan aplikasi server-side, basis data, dan aplikasi perangkat bergerak.",
     items: [
-      { id: "php", label: "PHP", fullLabel: "PHP", icon: "BracketsCurly" },
-      { id: "laravel", label: "Laravel", fullLabel: "Laravel (Blade)", icon: "Cube" },
-      { id: "nodejs", label: "Node.js", fullLabel: "Node.js", icon: "Hexagon" },
-      { id: "flutter", label: "Flutter", fullLabel: "Dart & Flutter", icon: "DeviceMobile" },
-      { id: "java", label: "Java", fullLabel: "Java (Android)", icon: "Coffee" },
-      { id: "cpp-lua", label: "C++ & Lua", fullLabel: "C++ & Lua", icon: "Cpu" }
+      { id: "php", label: "PHP", fullLabel: "PHP", icon: "php" },
+      { id: "laravel", label: "Laravel", fullLabel: "Laravel (Blade)", icon: "laravel" },
+      { id: "nodejs", label: "Node.js", fullLabel: "Node.js", icon: "nodejs" },
+      { id: "flutter", label: "Flutter", fullLabel: "Dart & Flutter", icon: "flutter" },
+      { id: "java", label: "Java", fullLabel: "Java (Android)", icon: "java" },
+      { id: "cpp-lua", label: "C++ & Lua", fullLabel: "C++ & Lua", icon: "cpp-lua" }
     ]
   },
   {
@@ -30,12 +30,12 @@ export const SKILL_GROUPS = [
     title: "Alur Kerja & Perkakas",
     description: "Manajemen versi kode, perancangan antarmuka, dan pengujian endpoint API.",
     items: [
-      { id: "git", label: "Git", fullLabel: "Git", icon: "GitBranch" },
-      { id: "github", label: "GitHub", fullLabel: "GitHub", icon: "GithubLogo" },
-      { id: "vscode", label: "VS Code", fullLabel: "VS Code", icon: "CodeBlock" },
-      { id: "figma", label: "Figma", fullLabel: "Figma", icon: "FigmaLogo" },
-      { id: "postman", label: "Postman", fullLabel: "Postman", icon: "PaperPlaneTilt" },
-      { id: "vercel", label: "Vercel", fullLabel: "Vercel Deployment", icon: "CloudArrowUp" }
+      { id: "git", label: "Git", fullLabel: "Git", icon: "git" },
+      { id: "github", label: "GitHub", fullLabel: "GitHub", icon: "github" },
+      { id: "vscode", label: "VS Code", fullLabel: "VS Code", icon: "vscode" },
+      { id: "figma", label: "Figma", fullLabel: "Figma", icon: "figma" },
+      { id: "postman", label: "Postman", fullLabel: "Postman", icon: "postman" },
+      { id: "vercel", label: "Vercel", fullLabel: "Vercel Deployment", icon: "vercel" }
     ]
   }
 ];

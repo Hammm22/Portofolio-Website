@@ -6,14 +6,27 @@ export const PROFILE_DATA = {
   program: "Siswa SMK Jurusan PPLG (Pengembangan Perangkat Lunak dan Gim)",
   tagline: "Code. Create. Improve.",
   location: "Indonesia",
-  schoolPlaceholder: "[SMK Jurusan PPLG]",
   email: "ilhamdwiarsandy61@gmail.com",
   githubUrl: "https://github.com/Hammm22",
   githubApiUrl: "https://api.github.com/users/Hammm22",
   avatarUrl: "https://avatars.githubusercontent.com/u/179662276?v=4",
-  // Simpan foto pribadimu di public/images/profile.jpg lalu ubah nilai photoUrl di bawah:
-  photoUrl: "/images/profile-placeholder.svg",
+  // Kedua foto pribadi di public/images/ (photo1.jpg dan photo2.jpg):
+  photoUrl: "/images/photo1.jpg",
   photoCaption: "Potret Observatorium · Ilham Dwi Arsandy",
+  aboutPhotos: [
+    {
+      id: "portrait-primary",
+      src: "/images/photo1.jpg",
+      alt: "Potret Observatorium 01 · Ilham Dwi Arsandy",
+      label: "Potret #01"
+    },
+    {
+      id: "portrait-secondary",
+      src: "/images/photo2.jpg",
+      alt: "Potret Observatorium 02 · Ilham Dwi Arsandy",
+      label: "Potret #02"
+    }
+  ],
   coordinates: "RA 06h 45m 08s · DEC -16° 42' 58\"",
   cvUrl: "/cv-ilham-dwi-arsandy.pdf",
   heroHeadline: "Merancang Web Interaktif dan Mobile.",

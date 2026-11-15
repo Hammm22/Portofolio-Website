@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,52 +8,16 @@ import { useGSAP } from "@gsap/react";
 import {
   ArrowsClockwise,
   ArrowUpRight,
-  Atom,
-  BracketsCurly,
-  CloudArrowUp,
-  Code,
-  CodeBlock,
-  Coffee,
-  Cpu,
-  Cube,
-  DeviceMobile,
-  FigmaLogo,
-  FileJs,
-  GitBranch,
-  GithubLogo,
-  Hexagon,
-  PaperPlaneTilt,
-  Polygon,
-  Sparkle,
-  Triangle,
-  Wind
+  GithubLogo
 } from "@phosphor-icons/react";
 import { PROFILE_DATA } from "@/data/profileData";
 import { SKILL_GROUPS } from "@/data/techData";
 import { useGithubProfile } from "@/hooks/useGithubProfile";
+import { useGithubContributions } from "@/hooks/useGithubContributions";
+import TechStackIcon from "@/components/ui/TechStackIcon";
+import GithubContributionHeatmap from "@/components/sections/GithubContributionHeatmap";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const SKILL_ICONS = {
-  FileJs,
-  Atom,
-  Triangle,
-  Polygon,
-  Wind,
-  Sparkle,
-  BracketsCurly,
-  Cube,
-  Hexagon,
-  DeviceMobile,
-  Coffee,
-  Cpu,
-  GitBranch,
-  GithubLogo,
-  CodeBlock,
-  FigmaLogo,
-  PaperPlaneTilt,
-  CloudArrowUp
-};
 
 export default function AboutSection() {
   const sectionRef = useRef(null);
@@ -67,6 +31,55 @@ export default function AboutSection() {
   const hasEnteredStatsRef = useRef(false);
 
   const { githubState, stats, refreshGithubProfile } = useGithubProfile();
+  const photos =
+    PROFILE_DATA.aboutPhotos?.length > 0
+      ? PROFILE_DATA.aboutPhotos
+      : [
+          {
+            id: "portrait-fallback",
+            src: PROFILE_DATA.photoUrl,
+            alt: PROFILE_DATA.photoCaption,
+            label: "Potret #01"
+          }
+        ];
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [isPortraitPaused, setIsPortraitPaused] = useState(false);
+
+  useEffect(() => {
+    if (photos.length <= 1 || isPortraitPaused) return undefined;
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+    if (reducedMotionQuery.matches) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      if (reducedMotionQuery.matches) return;
+      setActivePhotoIndex((prev) => (prev + 1) % photos.length);
+    }, 5200);
+
+    return () => window.clearInterval(intervalId);
+  }, [photos.length, isPortraitPaused]);
+
+  const handleNextPhoto = useCallback(() => {
+    if (photos.length <= 1) return;
+    setActivePhotoIndex((prev) => (prev + 1) % photos.length);
+  }, [photos.length]);
+
+  const activePhoto = photos[activePhotoIndex] || photos[0];
+  const {
+    contribStatus,
+    isContribRefreshing,
+    contribData,
+    contribError,
+    refreshContributions
+  } = useGithubContributions();
+  const isAnyGithubLoading =
+    githubState.status === "loading" || isContribRefreshing;
+
+  const handleRefreshGithubAll = useCallback(() => {
+    refreshGithubProfile();
+    refreshContributions();
+  }, [refreshGithubProfile, refreshContributions]);
   const latestStatsRef = useRef(stats);
 
   const animateCounters = useCallback((targetStats, fromZero = false) => {
@@ -338,9 +351,8 @@ export default function AboutSection() {
                       {group.items.map((item) => {
                         const skill =
                           typeof item === "string"
-                            ? { id: item, label: item, fullLabel: item, icon: "Code" }
+                            ? { id: item, label: item, fullLabel: item, icon: "javascript" }
                             : item;
-                        const IconComponent = SKILL_ICONS[skill.icon] || Code;
 
                         return (
                           <li
@@ -352,11 +364,9 @@ export default function AboutSection() {
                             }
                             className="about-skill-item group flex min-h-[78px] flex-col items-center justify-center gap-2 rounded-lg border border-[#1E293B] bg-[#0F172A]/80 px-1.5 py-3 text-center transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-[#38BDF8] hover:bg-[#0F172A]"
                           >
-                            <IconComponent
-                              size={24}
-                              weight="duotone"
-                              aria-hidden="true"
-                              className="shrink-0 text-[#38BDF8] transition-transform duration-200 group-hover:scale-110"
+                            <TechStackIcon
+                              name={skill.icon}
+                              className="h-6 w-6 shrink-0 transition-transform duration-200 group-hover:scale-110"
                             />
                             <span className="text-[11px] font-medium leading-tight text-[#CBD5E1] transition-colors duration-200 group-hover:text-[#F8FAFC] sm:text-xs">
                               {skill.label}
@@ -379,6 +389,7 @@ export default function AboutSection() {
                     alt={`Foto profil GitHub ${PROFILE_DATA.name}`}
                     width={44}
                     height={44}
+                    sizes="44px"
                     className="h-11 w-11 rounded-md border border-[#1E293B] object-cover"
                   />
                   <div>
@@ -392,17 +403,15 @@ export default function AboutSection() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={refreshGithubProfile}
-                    disabled={githubState.status === "loading"}
+                    onClick={handleRefreshGithubAll}
+                    disabled={isAnyGithubLoading}
                     aria-label="Segarkan data GitHub"
                     className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-[#64748B] bg-[#0F172A] px-3 py-2 text-xs font-medium text-[#F8FAFC] transition-colors hover:border-[#38BDF8] disabled:opacity-60"
                   >
                     <ArrowsClockwise
                       size={15}
                       weight="bold"
-                      className={
-                        githubState.status === "loading" ? "animate-spin" : ""
-                      }
+                      className={isAnyGithubLoading ? "animate-spin" : ""}
                       aria-hidden="true"
                     />
                     <span>Segarkan</span>
@@ -489,13 +498,29 @@ export default function AboutSection() {
                   </dd>
                 </div>
               </dl>
+
+              <GithubContributionHeatmap
+                status={contribStatus}
+                data={contribData}
+                error={contribError}
+                onRetry={refreshContributions}
+                githubUrl={stats.html_url || PROFILE_DATA.githubUrl}
+              />
             </div>
           </div>
 
-          {/* Right 5 Columns: 4:5 Portrait Frame with Curtain Reveal & 3D Tilt */}
+          {/* Right 5 Columns: 4:5 Portrait Frame with Curtain Reveal, Dual-Photo Dissolve & 3D Tilt */}
           <div className="order-1 mx-auto w-full max-w-sm md:sticky md:top-24 md:order-2 md:col-span-5 md:max-w-none [perspective:1100px]">
             <figure
               ref={portraitCardRef}
+              onMouseEnter={() => setIsPortraitPaused(true)}
+              onMouseLeave={() => setIsPortraitPaused(false)}
+              onFocusCapture={() => setIsPortraitPaused(true)}
+              onBlurCapture={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                  setIsPortraitPaused(false);
+                }
+              }}
               className="relative overflow-hidden rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-4 shadow-[0_20px_50px_rgba(6,11,25,0.65)] transition-colors hover:border-[#38BDF8] [transform-style:preserve-3d]"
             >
               <div
@@ -508,20 +533,71 @@ export default function AboutSection() {
                 ref={portraitImageWrapRef}
                 className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-[#060B19] will-change-transform"
               >
-                <Image
-                  src={PROFILE_DATA.photoUrl}
-                  alt={PROFILE_DATA.photoCaption}
-                  width={800}
-                  height={1000}
-                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-                />
+                <button
+                  type="button"
+                  onClick={handleNextPhoto}
+                  aria-label={`Foto profil aktif ${activePhoto.label}. Klik untuk mengganti ke foto berikutnya`}
+                  className="relative block h-full w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]"
+                >
+                  {photos.map((photo, idx) => {
+                    const isCurrent = idx === activePhotoIndex;
+                    return (
+                      <Image
+                        key={photo.id}
+                        src={photo.src}
+                        alt={photo.alt}
+                        width={800}
+                        height={1000}
+                        sizes="(max-width: 767px) 384px, (max-width: 1279px) 42vw, 480px"
+                        aria-hidden={!isCurrent}
+                        className={`absolute inset-0 h-full w-full object-cover will-change-[opacity,transform] motion-safe:transition-[opacity,transform] motion-safe:duration-1000 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                          isCurrent
+                            ? "z-10 scale-100 opacity-100"
+                            : "pointer-events-none z-0 scale-[1.06] opacity-0"
+                        }`}
+                      />
+                    );
+                  })}
+                </button>
               </div>
 
-              <figcaption className="mt-3 flex items-center justify-between pt-1">
-                <span className="font-display text-sm font-bold text-[#F8FAFC]">
-                  {PROFILE_DATA.name}
-                </span>
-                <span className="text-xs text-[#38BDF8]">SMK PPLG</span>
+              <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div>
+                  <span className="block font-display text-sm font-bold text-[#F8FAFC]">
+                    {PROFILE_DATA.name}
+                  </span>
+                  <span aria-live="polite" className="text-xs text-[#94A3B8]">
+                    {activePhoto.label} · SMK PPLG
+                  </span>
+                </div>
+
+                {photos.length > 1 && (
+                  <div
+                    role="group"
+                    aria-label="Pilih foto profil"
+                    className="flex items-center gap-1.5"
+                  >
+                    {photos.map((photo, idx) => {
+                      const isCurrent = idx === activePhotoIndex;
+                      return (
+                        <button
+                          key={photo.id}
+                          type="button"
+                          onClick={() => setActivePhotoIndex(idx)}
+                          aria-pressed={isCurrent}
+                          aria-label={`Tampilkan foto ${idx + 1}: ${photo.label}`}
+                          className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border font-mono text-xs transition-colors ${
+                            isCurrent
+                              ? "border-[#38BDF8] bg-[#38BDF8]/15 font-semibold text-[#F8FAFC]"
+                              : "border-[#1E293B] bg-[#060B19]/80 text-[#94A3B8] hover:border-[#64748B] hover:text-[#CBD5E1]"
+                          }`}
+                        >
+                          {String(idx + 1).padStart(2, "0")}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </figcaption>
             </figure>
           </div>

@@ -6,6 +6,25 @@ const STATIC_ASSET_CACHE_HEADER = [
   }
 ];
 
+const SECURITY_HEADERS = [
+  {
+    key: "X-Content-Type-Options",
+    value: "nosniff"
+  },
+  {
+    key: "X-Frame-Options",
+    value: "DENY"
+  },
+  {
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin"
+  },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()"
+  }
+];
+
 const nextConfig = {
   /* config options here */
   cacheComponents: true,
@@ -37,6 +56,10 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS
+      },
       {
         source: "/images/:path*",
         headers: STATIC_ASSET_CACHE_HEADER
