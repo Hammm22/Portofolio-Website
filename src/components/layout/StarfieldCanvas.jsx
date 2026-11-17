@@ -50,6 +50,10 @@ export default function StarfieldCanvas() {
         twinkleSpeed: 0.018 + Math.random() * 0.032,
         twinklePhase: Math.random() * Math.PI * 2,
         driftX: (Math.random() - 0.5) * 0.14 * layer,
+        nudgeX: 0,
+        nudgeY: 0,
+        vx: 0,
+        vy: 0,
         color:
           layer === 3 && i % 10 === 0
             ? "#38BDF8"
@@ -58,6 +62,7 @@ export default function StarfieldCanvas() {
     });
 
     const pointer = { x: -9999, y: -9999, active: false };
+    const ripples = [];
     let lastScrollY = window.scrollY || 0;
     let scrollVelocity = 0;
     let shootingStar = null;
@@ -65,7 +70,20 @@ export default function StarfieldCanvas() {
     let nebulaAngle = 0;
     let rafId = null;
 
-    // Pre-render radial nebula glow once to avoid 60fps gradient allocations
+    // Pre-render diagonal Milky Way nebula band + radial glow once to avoid per-frame allocations
+    const bandSprite = document.createElement("canvas");
+    bandSprite.width = 512;
+    bandSprite.height = 256;
+    const bandCtx = bandSprite.getContext("2d");
+    if (bandCtx) {
+      const bandGrad = bandCtx.createRadialGradient(256, 128, 12, 256, 128, 240);
+      bandGrad.addColorStop(0, "rgba(56, 189, 248, 0.09)");
+      bandGrad.addColorStop(0.42, "rgba(37, 99, 235, 0.075)");
+      bandGrad.addColorStop(1, "rgba(6, 11, 25, 0)");
+      bandCtx.fillStyle = bandGrad;
+      bandCtx.fillRect(0, 0, 512, 256);
+    }
+
     const nebulaSprite = document.createElement("canvas");
     nebulaSprite.width = 256;
     nebulaSprite.height = 256;
@@ -95,8 +113,27 @@ export default function StarfieldCanvas() {
     const drawFrame = (now) => {
       ctx.clearRect(0, 0, width, height);
 
-      // Subtle Moving Deep-Space Nebula Glow
+      const currentScrollY = window.scrollY || 0;
+      const deltaY = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
+      scrollVelocity = scrollVelocity * 0.85 + deltaY * 0.18;
+      const warpStretch = Math.min(Math.abs(scrollVelocity) * 0.85, 36);
+
+      // Tilted Milky Way Galactic Band + Moving Deep-Space Nebula Glow
       nebulaAngle += 0.003;
+      const bandOffsetY = Math.sin(nebulaAngle * 0.6) * 24 - currentScrollY * 0.025;
+      ctx.save();
+      ctx.translate(width * 0.52, height * 0.44 + bandOffsetY);
+      ctx.rotate(-0.38);
+      ctx.drawImage(
+        bandSprite,
+        -width * 0.78,
+        -height * 0.34,
+        width * 1.56,
+        height * 0.68
+      );
+      ctx.restore();
+
       const nebX = width * 0.5 + Math.cos(nebulaAngle) * (width * 0.18);
       const nebY = height * 0.38 + Math.sin(nebulaAngle * 0.8) * (height * 0.12);
       const nebRadius = Math.max(width, height) * 0.55;
@@ -108,12 +145,6 @@ export default function StarfieldCanvas() {
         nebRadius * 2
       );
 
-      const currentScrollY = window.scrollY || 0;
-      const deltaY = currentScrollY - lastScrollY;
-      lastScrollY = currentScrollY;
-      scrollVelocity = scrollVelocity * 0.85 + deltaY * 0.18;
-      const warpStretch = Math.min(Math.abs(scrollVelocity) * 0.85, 36);
-
       const renderedPositions = [];
 
       for (let i = 0; i < stars.length; i += 1) {
@@ -121,12 +152,18 @@ export default function StarfieldCanvas() {
         star.twinklePhase += star.twinkleSpeed;
         if (!prefersReducedMotion) {
           star.x = ((star.x + star.driftX) % width + width) % width;
+          star.vx *= 0.88;
+          star.vy *= 0.88;
+          star.nudgeX = (star.nudgeX + star.vx) * 0.92;
+          star.nudgeY = (star.nudgeY + star.vy) * 0.92;
         }
 
+        const starX = star.x + star.nudgeX;
         const wrappedY =
-          (((star.y - currentScrollY * star.parallaxFactor) % height) +
+          ((((star.y - currentScrollY * star.parallaxFactor) % height) +
             height) %
-          height;
+            height) +
+          star.nudgeY;
         const alpha = Math.max(
           0.2,
           Math.min(1, star.baseAlpha + Math.sin(star.twinklePhase) * 0.28)
@@ -139,9 +176,9 @@ export default function StarfieldCanvas() {
         if (warpStretch > 1.2 && !prefersReducedMotion) {
           ctx.lineWidth = star.radius * 1.35;
           ctx.beginPath();
-          ctx.moveTo(star.x, wrappedY);
+          ctx.moveTo(starX, wrappedY);
           ctx.lineTo(
-            star.x,
+            starX,
             wrappedY +
               (scrollVelocity >= 0 ? warpStretch : -warpStretch) *
                 star.parallaxFactor *
@@ -150,7 +187,7 @@ export default function StarfieldCanvas() {
           ctx.stroke();
         } else {
           ctx.beginPath();
-          ctx.arc(star.x, wrappedY, star.radius, 0, Math.PI * 2);
+          ctx.arc(starX, wrappedY, star.radius, 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -160,19 +197,19 @@ export default function StarfieldCanvas() {
           ctx.globalAlpha = alpha * 0.55;
           ctx.lineWidth = 0.95;
           ctx.beginPath();
-          ctx.moveTo(star.x - 6.5, wrappedY);
-          ctx.lineTo(star.x + 6.5, wrappedY);
-          ctx.moveTo(star.x, wrappedY - 6.5);
-          ctx.lineTo(star.x, wrappedY + 6.5);
+          ctx.moveTo(starX - 6.5, wrappedY);
+          ctx.lineTo(starX + 6.5, wrappedY);
+          ctx.moveTo(starX, wrappedY - 6.5);
+          ctx.lineTo(starX, wrappedY + 6.5);
           ctx.stroke();
         }
 
         if (pointer.active && star.layer >= 2) {
-          const dx = star.x - pointer.x;
+          const dx = starX - pointer.x;
           const dy = wrappedY - pointer.y;
           const dist = Math.hypot(dx, dy);
           if (dist < 195) {
-            renderedPositions.push({ x: star.x, y: wrappedY, dist });
+            renderedPositions.push({ x: starX, y: wrappedY, dist });
           }
         }
       }
@@ -272,6 +309,50 @@ export default function StarfieldCanvas() {
           }
         }
       }
+
+      // Cosmic Radar Ripples on Empty-Space Click
+      if (!prefersReducedMotion && ripples.length > 0) {
+        ctx.save();
+        for (let rIdx = ripples.length - 1; rIdx >= 0; rIdx -= 1) {
+          const ripple = ripples[rIdx];
+          ripple.radius += 5.4;
+          const progress = ripple.radius / ripple.maxRadius;
+
+          if (progress >= 1) {
+            ripples.splice(rIdx, 1);
+            continue;
+          }
+
+          const fade = (1 - progress) * ripple.alpha;
+
+          ctx.strokeStyle = `rgba(56, 189, 248, ${fade.toFixed(3)})`;
+          ctx.lineWidth = 1.3;
+          ctx.setLineDash([6, 10]);
+          ctx.beginPath();
+          ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = `rgba(37, 99, 235, ${(fade * 0.72).toFixed(3)})`;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(ripple.x, ripple.y, ripple.radius * 0.58, 0, Math.PI * 2);
+          ctx.stroke();
+
+          if (progress < 0.35) {
+            const crossAlpha = ((0.35 - progress) / 0.35) * 0.65;
+            ctx.strokeStyle = `rgba(248, 250, 252, ${crossAlpha.toFixed(3)})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ripple.x - 8, ripple.y);
+            ctx.lineTo(ripple.x + 8, ripple.y);
+            ctx.moveTo(ripple.x, ripple.y - 8);
+            ctx.lineTo(ripple.x, ripple.y + 8);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
     };
 
     if (prefersReducedMotion) {
@@ -305,18 +386,61 @@ export default function StarfieldCanvas() {
       pointer.active = false;
     };
 
+    const handlePointerDown = (e) => {
+      if (e.button && e.button !== 0) return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest(
+          'a, button, input, select, textarea, label, [role="button"], [role="dialog"], [role="application"]'
+        )
+      ) {
+        return;
+      }
+
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+      if (ripples.length >= 4) {
+        ripples.shift();
+      }
+      ripples.push({
+        x: clickX,
+        y: clickY,
+        radius: 10,
+        maxRadius: 210,
+        alpha: 0.72
+      });
+
+      const currentY = window.scrollY || 0;
+      for (let i = 0; i < stars.length; i += 1) {
+        const star = stars[i];
+        const starY =
+          (((star.y - currentY * star.parallaxFactor) % height) + height) %
+          height;
+        const dx = star.x - clickX;
+        const dy = starY - clickY;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 4 && dist < 185) {
+          const strength = (1 - dist / 185) * 3.4;
+          star.vx += (dx / dist) * strength;
+          star.vy += (dy / dist) * strength;
+        }
+      }
+    };
+
     const handleResize = () => {
       setCanvasSize();
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
     window.addEventListener("resize", handleResize);
 
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("resize", handleResize);
     };
   }, []);

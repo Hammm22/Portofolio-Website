@@ -15,7 +15,7 @@ File ini menyediakan konteks cepat untuk Gemini / Antigravity saat bekerja di da
 - `src/hooks/` : `useGithubProfile.js` (pengambilan statistik profil GitHub + cache lokal 30 menit + fallback data).
 - `src/components/ui/` : `TechStackIcon.jsx` (ikon logo resmi 18 stack teknologi untuk `AboutSection`).
 - `src/components/layout/` : `SmoothScroll.jsx` (Lenis + GSAP ticker + progress bar), `StarfieldCanvas.jsx` (HTML5 Canvas 3-layer parallax starfield + nebula + constellation cursor + shooting star), `ScrollRocket.jsx` (GSAP MotionPath scroll shuttle), `Navbar.jsx`, dan `Footer.jsx`.
-- `src/components/sections/` : `Hero.jsx`, `HeroObservatory3D.jsx` (Three.js desktop lazy 3D gyroscope), `AboutSection.jsx`, `FeaturedProjects.jsx`, `ProjectVisualStage.jsx`, `ProjectArchive.jsx`, `CertificateSection.jsx`, dan `JourneyTimeline.jsx`.
+- `src/components/sections/` : `Hero.jsx` (editorial 1 kolom terpusat + astrolabe SVG), `AboutSection.jsx`, `GithubContributionHeatmap.jsx`, `FeaturedProjects.jsx`, `ProjectVisualStage.jsx`, `ProjectArchive.jsx`, `CertificateSection.jsx`, dan `JourneyTimeline.jsx`.
 - `tests/` & `.github/workflows/ci.yml` : Unit test built-in Node (`npm test`) dan pipeline CI otomatis (`lint`, `test`, `build`).
 - `public/` : `images/profile-placeholder.svg` (bingkai potret 4:5), `images/certificates/*.svg` (6 placeholder foto sertifikat 16:11), dan `cv-ilham-dwi-arsandy.pdf`.
 

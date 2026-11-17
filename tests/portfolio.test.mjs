@@ -126,6 +126,7 @@ test("tidak ada sisa impor section usang dan seluruh gambar & header keamanan te
     "WorkflowSection",
     "CustomCursor",
     "KineticMarquee",
+    "HeroObservatory3D",
     "#services",
     "#workflow"
   ];

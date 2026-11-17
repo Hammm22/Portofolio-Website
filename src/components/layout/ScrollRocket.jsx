@@ -7,12 +7,17 @@ import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 
 gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
+const ORBIT_PATH_D =
+  "M -60,220 C 320,100 840,210 885,430 C 930,650 180,580 125,770 C 70,920 620,940 1060,810";
+
 export default function ScrollRocket() {
   const wrapRef = useRef(null);
   const pathRef = useRef(null);
+  const litPathRef = useRef(null);
   const rocketRef = useRef(null);
   const spriteRef = useRef(null);
   const flameRef = useRef(null);
+  const plumeGlowRef = useRef(null);
   const [resizeTick, setResizeTick] = useState(0);
 
   useEffect(() => {
@@ -52,15 +57,28 @@ export default function ScrollRocket() {
     const rocket = rocketRef.current;
     const sprite = spriteRef.current;
     const flame = flameRef.current;
+    const plumeGlow = plumeGlowRef.current;
     const pathEl = pathRef.current;
+    const litPathEl = litPathRef.current;
 
     const ctx = gsap.context(() => {
       gsap.set(rocket, { opacity: 0, scale: 0.85 });
+      if (litPathEl) {
+        litPathEl.style.strokeDashoffset = "1000";
+        litPathEl.style.opacity = "0";
+      }
       if (flame) {
         gsap.set(flame, {
           transformOrigin: "100% 50%",
           scaleX: 0.7,
           opacity: 0.45
+        });
+      }
+      if (plumeGlow) {
+        gsap.set(plumeGlow, {
+          transformOrigin: "100% 50%",
+          scaleX: 0.7,
+          opacity: 0.25
         });
       }
 
@@ -89,10 +107,20 @@ export default function ScrollRocket() {
                     ? (0.99 - p) / 0.04
                     : 1;
 
+            const clampedAlpha = Math.max(0, Math.min(1, visibleAlpha));
             gsap.set(rocket, {
-              opacity: Math.max(0, Math.min(1, visibleAlpha)),
-              scale: 0.9 + visibleAlpha * 0.1
+              opacity: clampedAlpha,
+              scale: 0.9 + clampedAlpha * 0.1
             });
+
+            if (litPathEl) {
+              litPathEl.style.strokeDashoffset = String(
+                (1000 * (1 - p)).toFixed(2)
+              );
+              litPathEl.style.opacity = String(
+                (clampedAlpha * 0.48).toFixed(3)
+              );
+            }
 
             gsap.to(sprite, {
               scaleX: self.direction === -1 ? -1 : 1,
@@ -100,14 +128,24 @@ export default function ScrollRocket() {
               overwrite: "auto"
             });
 
-            if (flame) {
+            if (flame || plumeGlow) {
               const speed = Math.min(Math.abs(self.getVelocity()) / 1800, 1);
-              gsap.to(flame, {
-                scaleX: 0.65 + speed * 1.45,
-                opacity: 0.35 + speed * 0.65,
-                duration: 0.14,
-                overwrite: "auto"
-              });
+              if (flame) {
+                gsap.to(flame, {
+                  scaleX: 0.65 + speed * 1.45,
+                  opacity: 0.35 + speed * 0.65,
+                  duration: 0.14,
+                  overwrite: "auto"
+                });
+              }
+              if (plumeGlow) {
+                gsap.to(plumeGlow, {
+                  scaleX: 0.65 + speed * 1.6,
+                  opacity: 0.2 + speed * 0.55,
+                  duration: 0.16,
+                  overwrite: "auto"
+                });
+              }
             }
           }
         }
@@ -131,12 +169,24 @@ export default function ScrollRocket() {
       >
         <path
           ref={pathRef}
-          d="M -60,220 C 320,100 840,210 885,430 C 930,650 180,580 125,770 C 70,920 620,940 1060,810"
+          d={ORBIT_PATH_D}
           stroke="#38BDF8"
-          strokeOpacity="0.13"
-          strokeWidth="1.5"
+          strokeOpacity="0.12"
+          strokeWidth="1.4"
           strokeDasharray="6 12"
           vectorEffect="non-scaling-stroke"
+        />
+        <path
+          ref={litPathRef}
+          d={ORBIT_PATH_D}
+          pathLength="1000"
+          stroke="#38BDF8"
+          strokeWidth="2"
+          strokeDasharray="1000"
+          strokeDashoffset="1000"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          style={{ opacity: 0 }}
         />
       </svg>
 
@@ -151,7 +201,16 @@ export default function ScrollRocket() {
             fill="none"
             className="h-full w-full drop-shadow-[0_0_12px_rgba(56,189,248,0.45)]"
           >
-            {/* Dynamic Exhaust Thruster Flame */}
+            {/* Dynamic Exhaust Thruster Plume & Core */}
+            <ellipse
+              ref={plumeGlowRef}
+              cx="11"
+              cy="24"
+              rx="7.5"
+              ry="4.2"
+              fill="#38BDF8"
+              fillOpacity="0.35"
+            />
             <g ref={flameRef}>
               <path
                 d="M15 20.5 L2 24 L15 27.5 Z"

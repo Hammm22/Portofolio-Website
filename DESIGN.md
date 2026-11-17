@@ -63,7 +63,7 @@ Menggunakan `clamp()` agar teks proporsional dari layar `375px` hingga `1440px+`
   - **Desktop (`>= 1024px`):** Grid editorial asimetris 12 kolom (7:5 pada `AboutSection`) dan *Pinned Horizontal Showcase* pada `FeaturedProjects`.
 - **GSAP & Lenis Hygiene (`ui-ux-pro-max`):**
   - Seluruh animasi dibungkus `useGSAP(() => { ... }, { scope: containerRef })` untuk pembersihan otomatis.
-  - Menggunakan `gsap.matchMedia()` serta `ScrollTrigger.config({ ignoreMobileResize: true })` untuk memisahkan koreografi 3D desktop, GSAP `Flip` + scroll-scrubbed depth di mobile, dan preferensi `prefers-reduced-motion: reduce`.
-  - Di desktop (`>= 1024px`), `Hero.jsx` memuat `HeroObservatory3D.jsx` (`three`, lazy `ssr: false`) di panggung kanan dengan interaksi hover, drag-orbit, dan sinkronisasi `ScrollTrigger`; di `< 1024px`, `0 KB` Three.js dimuat.
+  - Menggunakan `gsap.matchMedia()` serta `ScrollTrigger.config({ ignoreMobileResize: true })` untuk memisahkan koreografi parallax/astrolabe desktop, GSAP `Flip` + scroll-scrubbed depth di mobile, dan preferensi `prefers-reduced-motion: reduce`.
+  - Di seluruh ukuran layar, `Hero.jsx` menggunakan tata letak editorial 1 kolom terpusat di atas panggung astrolabe SVG multi-cincin dan strip stack inti (`React.js`, `Next.js`, `Laravel`, `Flutter`) tanpa beban WebGL/Three.js.
   - Hanya menganimasikan properti komposit (`transform: translate/scale/rotate3d`, `clip-path`, `opacity`) ditambah `StarfieldCanvas.jsx` berbasis `requestAnimationFrame` yang otomatis berhenti saat tab tersembunyi atau `prefers-reduced-motion: reduce` aktif.
   - Menyertakan bingkai potret observatorium `4:5` di `AboutSection.jsx` serta galeri `CertificateSection.jsx` (`16:11`) dengan modal Lightbox aksesibel.
