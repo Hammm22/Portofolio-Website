@@ -531,7 +531,7 @@ export default function AboutSection() {
 
               <div
                 ref={portraitImageWrapRef}
-                className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-[#060B19] will-change-transform"
+                className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-[#060B19]"
               >
                 <button
                   type="button"
@@ -548,9 +548,10 @@ export default function AboutSection() {
                         alt={photo.alt}
                         width={800}
                         height={1000}
+                        loading={idx === 0 ? "eager" : "lazy"}
                         sizes="(max-width: 767px) 384px, (max-width: 1279px) 42vw, 480px"
                         aria-hidden={!isCurrent}
-                        className={`absolute inset-0 h-full w-full object-cover will-change-[opacity,transform] motion-safe:transition-[opacity,transform] motion-safe:duration-1000 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                        className={`absolute inset-0 h-full w-full object-cover motion-safe:transition-[opacity,transform] motion-safe:duration-1000 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
                           isCurrent
                             ? "z-10 scale-100 opacity-100"
                             : "pointer-events-none z-0 scale-[1.06] opacity-0"

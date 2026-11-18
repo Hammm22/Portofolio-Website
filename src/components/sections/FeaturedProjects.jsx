@@ -226,7 +226,7 @@ export default function FeaturedProjects() {
     >
       <div
         ref={pinWrapRef}
-        className="mx-auto flex min-h-0 max-w-7xl flex-col justify-center px-4 py-14 sm:px-6 sm:py-20 lg:min-h-[100dvh] lg:overflow-hidden lg:px-8 lg:py-16"
+        className="mx-auto flex min-h-0 max-w-7xl flex-col justify-center px-4 py-14 sm:px-6 sm:py-20 lg:min-h-[100dvh] lg:overflow-hidden lg:px-8 lg:pt-24 lg:pb-12"
       >
         <div className="projects-header-reveal flex flex-col justify-between gap-4 border-b border-[#1E293B] pb-5 lg:flex-row lg:items-end lg:pb-6">
           <div>

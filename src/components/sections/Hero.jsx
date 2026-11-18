@@ -445,7 +445,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
         <div
           ref={contentWrapRef}
-          className="mx-auto max-w-4xl text-center will-change-transform"
+          className="mx-auto max-w-4xl text-center"
         >
           <h1>
             <span className="hero-name-reveal inline-block rounded-full border border-[#1E293B] bg-[#0F172A]/75 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#38BDF8] sm:px-4 sm:text-sm">
@@ -462,7 +462,7 @@ export default function Hero() {
                     className="inline-block overflow-hidden pb-1.5 sm:pb-2"
                   >
                     <span
-                      className={`hero-word-inner inline-block will-change-transform ${
+                      className={`hero-word-inner inline-block ${
                         isHighlight ? "text-[#38BDF8]" : ""
                       }`}
                     >
@@ -528,7 +528,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-4 mx-auto flex max-w-7xl items-center justify-center px-4 sm:px-6 lg:px-8">
         <p
           aria-hidden="true"
-          className="hidden items-center gap-2 font-mono text-[11px] tracking-wide text-[#94A3B8] md:absolute md:top-1/2 md:left-6 md:inline-flex md:-translate-y-1/2 lg:left-8"
+          className="hidden items-center gap-2 font-mono text-[11px] tracking-wide text-[#94A3B8] lg:absolute lg:top-1/2 lg:left-8 lg:inline-flex lg:-translate-y-1/2"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-[#38BDF8]" />
           <span ref={coordTextRef}>{PROFILE_DATA.coordinates}</span>

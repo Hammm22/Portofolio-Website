@@ -376,7 +376,11 @@ export default function StarfieldCanvas() {
 
     rafId = window.requestAnimationFrame(tick);
 
-    const handleMouseMove = (e) => {
+    const handlePointerMove = (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") {
+        pointer.active = false;
+        return;
+      }
       pointer.x = e.clientX;
       pointer.y = e.clientY;
       pointer.active = true;
@@ -387,6 +391,9 @@ export default function StarfieldCanvas() {
     };
 
     const handlePointerDown = (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") {
+        pointer.active = false;
+      }
       if (e.button && e.button !== 0) return;
       if (
         e.target instanceof Element &&
@@ -431,14 +438,14 @@ export default function StarfieldCanvas() {
       setCanvasSize();
     };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("pointerdown", handlePointerDown, { passive: true });
     window.addEventListener("resize", handleResize);
 
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("resize", handleResize);

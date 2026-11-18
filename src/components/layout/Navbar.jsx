@@ -37,7 +37,7 @@ export default function Navbar() {
   const [activeSectionId, setActiveSectionId] = useState("hero");
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Track scrolled state & bottom footer detection
+  // Track scrolled state & bottom footer detection without forced scroll-time layout reflow
   useEffect(() => {
     const sectionIds = [
       "hero",
@@ -48,31 +48,58 @@ export default function Navbar() {
       .map((id) => document.getElementById(id))
       .filter(Boolean);
 
-    const handleScrollState = () => {
+    let maxScrollBottom = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight
+    );
+    let scrollRafId = null;
+
+    const updateLayoutMetrics = () => {
+      maxScrollBottom = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight
+      );
+    };
+
+    const isNearBottom = (scrollY) =>
+      maxScrollBottom > 0 && scrollY >= maxScrollBottom - 24;
+
+    const syncScrollState = () => {
+      scrollRafId = null;
       const scrollY = window.scrollY || 0;
       setIsScrolled(scrollY > 24);
-
-      const atBottom =
-        window.innerHeight + scrollY >=
-        document.documentElement.scrollHeight - 24;
-      if (atBottom) {
+      if (isNearBottom(scrollY)) {
         setActiveSectionId("contact");
       }
     };
 
-    handleScrollState();
+    const handleScrollState = () => {
+      if (scrollRafId !== null) return;
+      scrollRafId = window.requestAnimationFrame(syncScrollState);
+    };
+
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(updateLayoutMetrics);
+      resizeObserver.observe(document.documentElement);
+    }
+
+    syncScrollState();
     window.addEventListener("scroll", handleScrollState, { passive: true });
+    window.addEventListener("resize", updateLayoutMetrics, { passive: true });
 
     if (elements.length === 0) {
-      return () => window.removeEventListener("scroll", handleScrollState);
+      return () => {
+        if (scrollRafId !== null) window.cancelAnimationFrame(scrollRafId);
+        resizeObserver?.disconnect();
+        window.removeEventListener("scroll", handleScrollState);
+        window.removeEventListener("resize", updateLayoutMetrics);
+      };
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const atBottom =
-          window.innerHeight + window.scrollY >=
-          document.documentElement.scrollHeight - 24;
-        if (atBottom) {
+        if (isNearBottom(window.scrollY || 0)) {
           setActiveSectionId("contact");
           return;
         }
@@ -93,8 +120,11 @@ export default function Navbar() {
 
     elements.forEach((el) => observer.observe(el));
     return () => {
+      if (scrollRafId !== null) window.cancelAnimationFrame(scrollRafId);
       observer.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener("scroll", handleScrollState);
+      window.removeEventListener("resize", updateLayoutMetrics);
     };
   }, []);
 

@@ -388,7 +388,7 @@ export default function CertificateSection() {
                       setSelectedCert(cert);
                     }}
                     aria-label={`Perbesar foto sertifikat ${cert.title}`}
-                    className="cert-thumb-mask relative block aspect-[16/11] w-full overflow-hidden rounded-md bg-[#060B19] text-left focus-visible:outline-2 focus-visible:outline-[#38BDF8]"
+                    className="cert-thumb-mask relative block aspect-[16/11] w-full overflow-hidden rounded-md border border-[#1E293B] bg-[#060B19] p-1.5 text-left focus-visible:outline-2 focus-visible:outline-[#38BDF8]"
                   >
                     <Image
                       src={cert.imageUrl}
@@ -396,7 +396,7 @@ export default function CertificateSection() {
                       width={880}
                       height={605}
                       sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 400px"
-                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                      className="h-full w-full rounded-[4px] object-contain transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                     <span className="absolute right-2.5 bottom-2.5 inline-flex items-center gap-1.5 rounded bg-[#060B19]/90 px-2.5 py-1.5 text-xs font-medium text-[#F8FAFC] backdrop-blur-sm">
                       <ArrowsOutSimple
@@ -410,13 +410,21 @@ export default function CertificateSection() {
                   </button>
 
                   <div className="mt-4">
-                    <p className="text-xs text-[#38BDF8]">
-                      {cert.issuer} · {cert.date}
-                    </p>
-                    <h3 className="mt-1 font-display text-lg font-bold text-[#F8FAFC]">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-medium text-[#38BDF8]">
+                        {cert.index} · {cert.category}
+                      </span>
+                      <span className="font-mono text-[11px] text-[#94A3B8]">
+                        {cert.date}
+                      </span>
+                    </div>
+                    <h3 className="mt-1.5 font-display text-lg font-bold text-[#F8FAFC]">
                       {cert.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#CBD5E1]">
+                    <p className="mt-0.5 text-xs text-[#94A3B8]">
+                      {cert.issuer}
+                    </p>
+                    <p className="mt-2.5 text-sm leading-relaxed text-[#CBD5E1]">
                       {cert.summary}
                     </p>
                   </div>

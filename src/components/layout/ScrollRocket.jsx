@@ -82,6 +82,29 @@ export default function ScrollRocket() {
         });
       }
 
+      const spriteScaleXTo = gsap.quickTo(sprite, "scaleX", {
+        duration: 0.18,
+        ease: "power2.out"
+      });
+      const flameScaleXTo = flame
+        ? gsap.quickTo(flame, "scaleX", { duration: 0.14, ease: "power2.out" })
+        : null;
+      const flameOpacityTo = flame
+        ? gsap.quickTo(flame, "opacity", { duration: 0.14, ease: "power2.out" })
+        : null;
+      const plumeScaleXTo = plumeGlow
+        ? gsap.quickTo(plumeGlow, "scaleX", {
+            duration: 0.16,
+            ease: "power2.out"
+          })
+        : null;
+      const plumeOpacityTo = plumeGlow
+        ? gsap.quickTo(plumeGlow, "opacity", {
+            duration: 0.16,
+            ease: "power2.out"
+          })
+        : null;
+
       gsap.to(rocket, {
         ease: "none",
         motionPath: {
@@ -122,29 +145,17 @@ export default function ScrollRocket() {
               );
             }
 
-            gsap.to(sprite, {
-              scaleX: self.direction === -1 ? -1 : 1,
-              duration: 0.18,
-              overwrite: "auto"
-            });
+            spriteScaleXTo(self.direction === -1 ? -1 : 1);
 
-            if (flame || plumeGlow) {
+            if (flameScaleXTo || plumeScaleXTo) {
               const speed = Math.min(Math.abs(self.getVelocity()) / 1800, 1);
-              if (flame) {
-                gsap.to(flame, {
-                  scaleX: 0.65 + speed * 1.45,
-                  opacity: 0.35 + speed * 0.65,
-                  duration: 0.14,
-                  overwrite: "auto"
-                });
+              if (flameScaleXTo && flameOpacityTo) {
+                flameScaleXTo(0.65 + speed * 1.45);
+                flameOpacityTo(0.35 + speed * 0.65);
               }
-              if (plumeGlow) {
-                gsap.to(plumeGlow, {
-                  scaleX: 0.65 + speed * 1.6,
-                  opacity: 0.2 + speed * 0.55,
-                  duration: 0.16,
-                  overwrite: "auto"
-                });
+              if (plumeScaleXTo && plumeOpacityTo) {
+                plumeScaleXTo(0.65 + speed * 1.6);
+                plumeOpacityTo(0.2 + speed * 0.55);
               }
             }
           }
@@ -193,9 +204,9 @@ export default function ScrollRocket() {
       {/* Undistorted 1:1 Shuttle Sprite aligned to flight curve */}
       <div
         ref={rocketRef}
-        className="absolute top-0 left-0 h-9 w-9 opacity-0 will-change-transform sm:h-12 sm:w-12"
+        className="absolute top-0 left-0 h-9 w-9 opacity-0 sm:h-12 sm:w-12"
       >
-        <div ref={spriteRef} className="h-full w-full will-change-transform">
+        <div ref={spriteRef} className="h-full w-full">
           <svg
             viewBox="0 0 48 48"
             fill="none"

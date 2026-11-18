@@ -344,10 +344,10 @@ export default function ProjectArchive() {
                         key={project.id}
                         data-flip-id={project.id}
                         onClick={() => setActiveProjectId(project.id)}
-                        className={`archive-row-item transition-colors lg:cursor-pointer ${
+                        className={`archive-row-item border-l-2 transition-colors lg:cursor-pointer ${
                           isSelectedPreview
-                            ? "lg:bg-[#131F38]"
-                            : "hover:bg-[#131F38]/60"
+                            ? "border-l-transparent lg:border-l-[#38BDF8] lg:bg-[#131F38]"
+                            : "border-l-transparent hover:bg-[#131F38]/60"
                         }`}
                       >
                         <div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-12 sm:items-center sm:px-5">
@@ -435,6 +435,11 @@ export default function ProjectArchive() {
                             id={`archive-detail-${project.id}`}
                             className="border-t border-[#1E293B] bg-[#060B19]/90 px-4 py-4 sm:px-5 lg:hidden"
                           >
+                            {project.context && (
+                              <p className="mb-1.5 font-mono text-[11px] font-medium text-[#38BDF8]">
+                                {project.context}
+                              </p>
+                            )}
                             <p className="text-sm leading-relaxed text-[#CBD5E1]">
                               {project.description}
                             </p>
@@ -482,8 +487,12 @@ export default function ProjectArchive() {
                   ref={inspectorCardRef}
                   className="min-w-0 rounded-lg border border-[#1E293B] bg-[#0F172A]/90 p-6"
                 >
-                  <p className="text-xs font-medium text-[#38BDF8]">
-                    {displayedInspector.category} · {displayedInspector.year}
+                  <p className="font-mono text-xs font-medium text-[#38BDF8]">
+                    {displayedInspector.category}
+                    {displayedInspector.context
+                      ? ` · ${displayedInspector.context}`
+                      : ""}{" "}
+                    · {displayedInspector.year}
                   </p>
 
                   <h3 className="mt-1 break-words font-display text-2xl font-bold text-[#F8FAFC]">
